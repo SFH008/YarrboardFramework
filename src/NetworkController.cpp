@@ -6,21 +6,19 @@
   License: GPLv3
 */
 
-#include "YarrboardNetworkManager.h"
-#include "ConfigManager.h"
+#include "NetworkController.h"
 #include "YarrboardDebug.h"
 #include "rgb.h"
-// #include "setup.h"
 
-YarrboardNetworkManager* YarrboardNetworkManager::_instance = nullptr;
+NetworkController* NetworkController::_instance = nullptr;
 
-YarrboardNetworkManager::YarrboardNetworkManager(ConfigManager& config) : _config(config),
-                                                                          improvSerial(&Serial),
-                                                                          apIP(8, 8, 4, 4)
+NetworkController::NetworkController(ConfigManager& config) : _config(config),
+                                                              improvSerial(&Serial),
+                                                              apIP(8, 8, 4, 4)
 {
 }
 
-void YarrboardNetworkManager::setup()
+void NetworkController::setup()
 {
 
   _instance = this; // Capture the instance for callbacks
@@ -31,11 +29,11 @@ void YarrboardNetworkManager::setup()
   setupWifi();
 }
 
-void YarrboardNetworkManager::loop()
+void NetworkController::loop()
 {
 }
 
-void YarrboardNetworkManager::setupWifi()
+void NetworkController::setupWifi()
 {
   // which mode do we want?
   if (!strcmp(_config.wifi_mode, "client")) {
@@ -68,7 +66,7 @@ void YarrboardNetworkManager::setupWifi()
   }
 }
 
-bool YarrboardNetworkManager::connectToWifi(const char* ssid, const char* pass)
+bool NetworkController::connectToWifi(const char* ssid, const char* pass)
 {
 #ifdef YB_HAS_STATUS_RGB
   rgb_set_status_color(CRGB::Yellow);
@@ -132,7 +130,7 @@ bool YarrboardNetworkManager::connectToWifi(const char* ssid, const char* pass)
   return false;
 }
 
-void YarrboardNetworkManager::startServices()
+void NetworkController::startServices()
 {
   // some global config
   WiFi.setHostname(_config.local_hostname);
@@ -147,7 +145,7 @@ void YarrboardNetworkManager::startServices()
   MDNS.addService("http", "tcp", 80);
 }
 
-void YarrboardNetworkManager::setupImprov()
+void NetworkController::setupImprov()
 {
   YBP.println("First Boot: starting Improv");
 
@@ -181,7 +179,7 @@ void YarrboardNetworkManager::setupImprov()
   improvBLE.setCustomConnectWiFi(_onImprovCustomConnectWiFiStatic);
 }
 
-void YarrboardNetworkManager::loopImprov()
+void NetworkController::loopImprov()
 {
   if (_config.is_first_boot)
     improvSerial.handleSerial();
@@ -191,21 +189,21 @@ void YarrboardNetworkManager::loopImprov()
 //  Static Proxy Callbacks (The Bridge)
 // ==========================================================
 
-void YarrboardNetworkManager::_onImprovErrorStatic(ImprovTypes::Error err)
+void NetworkController::_onImprovErrorStatic(ImprovTypes::Error err)
 {
   if (_instance) {
     _instance->_handleImprovError(err);
   }
 }
 
-void YarrboardNetworkManager::_onImprovConnectedStatic(const char* ssid, const char* password)
+void NetworkController::_onImprovConnectedStatic(const char* ssid, const char* password)
 {
   if (_instance) {
     _instance->_handleImprovConnected(ssid, password);
   }
 }
 
-bool YarrboardNetworkManager::_onImprovCustomConnectWiFiStatic(const char* ssid, const char* password)
+bool NetworkController::_onImprovCustomConnectWiFiStatic(const char* ssid, const char* password)
 {
   if (_instance) {
     return _instance->connectToWifi(ssid, password);
@@ -213,7 +211,7 @@ bool YarrboardNetworkManager::_onImprovCustomConnectWiFiStatic(const char* ssid,
   return false;
 }
 
-void YarrboardNetworkManager::_handleImprovError(ImprovTypes::Error err)
+void NetworkController::_handleImprovError(ImprovTypes::Error err)
 {
   YBP.printf("wifi error: %d\n", err);
 
@@ -222,7 +220,7 @@ void YarrboardNetworkManager::_handleImprovError(ImprovTypes::Error err)
 #endif
 }
 
-void YarrboardNetworkManager::_handleImprovConnected(const char* ssid, const char* password)
+void NetworkController::_handleImprovConnected(const char* ssid, const char* password)
 {
   YBP.printf("Improv Successful: %s / %s\n", ssid, password);
 

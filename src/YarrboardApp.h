@@ -14,13 +14,13 @@
 #define YarrboardApp_h
 
 #include "ConfigManager.h"
-#include "YarrboardNetworkManager.h"
+#include "NetworkController.h"
 
 class YarrboardApp
 {
   public:
     ConfigManager config;
-    YarrboardNetworkManager network;
+    NetworkController network;
 
     YarrboardApp();
 

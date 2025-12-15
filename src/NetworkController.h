@@ -30,10 +30,10 @@
 // void onImprovWiFiErrorCb(ImprovTypes::Error err);
 // void onImprovWiFiConnectedCb(const char* ssid, const char* password);
 
-class YarrboardNetworkManager
+class NetworkController
 {
   public:
-    YarrboardNetworkManager(ConfigManager& config);
+    NetworkController(ConfigManager& config);
 
     void setup();
     void loop();
@@ -59,7 +59,7 @@ class YarrboardNetworkManager
     // --- THE CALLBACK TRAP ---
     // Libraries expecting C-style function pointers cannot take normal member functions.
     // We use a static instance pointer and static methods to bridge the gap.
-    static YarrboardNetworkManager* _instance;
+    static NetworkController* _instance;
 
     static void _onImprovErrorStatic(ImprovTypes::Error err);
     static void _onImprovConnectedStatic(const char* ssid, const char* password);
