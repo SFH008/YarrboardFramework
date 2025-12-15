@@ -6,7 +6,8 @@
   License: GPLv3
 */
 
-#include "mqtt.h"
+#include "MQTTController.h"
+#include "ConfigManager.h"
 #include "YarrboardDebug.h"
 
 #ifdef YB_HAS_ADC_CHANNELS
@@ -33,30 +34,35 @@
   #include "servo_channel.h"
 #endif
 
-PsychicMqttClient mqttClient;
+MQTTController* MQTTController::_instance = nullptr;
 
-unsigned long previousMQTTMillis = 0;
-
-void mqtt_setup()
+MQTTController::MQTTController(YarrboardApp& app, ConfigManager& config) : _app(app),
+                                                                           _config(config)
 {
+}
+
+void MQTTController::setup()
+{
+  _instance = this; // Capture the instance for callbacks
+
   // are we enabled?
-  if (!config.app_enable_mqtt)
+  if (!_config.app_enable_mqtt)
     return;
 
-  mqttClient.setServer(config.mqtt_server);
-  mqttClient.setCredentials(config.mqtt_user, config.mqtt_pass);
+  mqttClient.setServer(_config.mqtt_server);
+  mqttClient.setCredentials(_config.mqtt_user, _config.mqtt_pass);
 
-  if (config.mqtt_cert.length())
-    mqttClient.setCACert(config.mqtt_cert.c_str());
+  if (_config.mqtt_cert.length())
+    mqttClient.setCACert(_config.mqtt_cert.c_str());
 
   // on connect home hook
-  mqttClient.onConnect(onMqttConnect);
+  mqttClient.onConnect(_onConnectStatic);
 
   // home assistant connection discovery hook.
-  if (config.app_enable_ha_integration) {
+  if (_config.app_enable_ha_integration) {
     mqttClient.onTopic("homeassistant/status", 0, [&](const char* topic, const char* payload, int retain, int qos, bool dup) {
       if (!strcmp(payload, "online"))
-        mqtt_ha_discovery();
+        haDiscovery();
     });
   }
 
@@ -77,7 +83,7 @@ void mqtt_setup()
   }
 }
 
-void mqtt_loop()
+void MQTTController::loop()
 {
   if (!mqttClient.connected())
     return;
@@ -116,7 +122,7 @@ void mqtt_loop()
 #endif
 
       // separately update our Home Assistant status
-      if (config.app_enable_ha_integration) {
+      if (_config.app_enable_ha_integration) {
 #ifdef YB_HAS_PWM_CHANNELS
         ha_update_channels(pwm_channels);
 #endif
@@ -130,23 +136,23 @@ void mqtt_loop()
   }
 }
 
-void mqtt_disconnect()
+void MQTTController::disconnect()
 {
   if (mqttClient.connected())
     mqttClient.disconnect();
 }
 
-bool mqtt_is_connected()
+bool MQTTController::isConnected()
 {
   return mqttClient.connected();
 }
 
-void mqtt_on_topic(const char* topic, int qos, OnMessageUserCallback callback)
+void MQTTController::onTopic(const char* topic, int qos, OnMessageUserCallback callback)
 {
   mqttClient.onTopic(topic, qos, callback);
 }
 
-void mqtt_publish(const char* topic, const char* payload, bool use_prefix)
+void MQTTController::publish(const char* topic, const char* payload, bool use_prefix)
 {
   if (!mqttClient.connected())
     return;
@@ -156,7 +162,7 @@ void mqtt_publish(const char* topic, const char* payload, bool use_prefix)
   // prefix it with yarrboard or nah?
   if (use_prefix) {
     char mqtt_path[256];
-    sprintf(mqtt_path, "yarrboard/%s/%s", config.local_hostname, topic);
+    sprintf(mqtt_path, "yarrboard/%s/%s", _config.local_hostname, topic);
     ret = mqttClient.publish(mqtt_path, 0, 0, payload, strlen(payload), false);
     if (ret == -1)
       YBP.printf("[mqtt] Error publishing prefix path %s\n", mqtt_path);
@@ -167,36 +173,50 @@ void mqtt_publish(const char* topic, const char* payload, bool use_prefix)
   }
 }
 
-void mqtt_receive_message(const char* topic, const char* payload, int retain, int qos, bool dup)
+void MQTTController::receiveMessage(const char* topic, const char* payload, int retain, int qos, bool dup)
 {
   YBP.printf("Received Topic: %s\r\n", topic);
   YBP.printf("Received Payload: %s\r\n", payload);
 }
 
-void onMqttConnect(bool sessionPresent)
+void MQTTController::_receiveMessageStatic(const char* topic, const char* payload, int retain, int qos, bool dup)
+{
+  if (_instance) {
+    _instance->receiveMessage(topic, payload, retain, qos, dup);
+  }
+}
+
+void MQTTController::onConnect(bool sessionPresent)
 {
   YBP.println("Connected to MQTT.");
 
-  if (config.app_enable_ha_integration)
-    mqtt_ha_discovery();
+  if (_config.app_enable_ha_integration)
+    haDiscovery();
 
   // look for json messages on this path...
   char mqtt_path[128];
-  sprintf(mqtt_path, "yarrboard/%s/command", config.local_hostname);
-  mqttClient.onTopic(mqtt_path, 0, mqtt_receive_message);
+  sprintf(mqtt_path, "yarrboard/%s/command", _config.local_hostname);
+  mqttClient.onTopic(mqtt_path, 0, _receiveMessageStatic);
 }
 
-void mqtt_ha_discovery()
+void MQTTController::_onConnectStatic(bool sessionPresent)
+{
+  if (_instance) {
+    _instance->onConnect(sessionPresent);
+  }
+}
+
+void MQTTController::haDiscovery()
 {
   if (!mqttClient.connected())
     return;
 
   // how to structure our id?
   char ha_dev_uuid[128];
-  if (config.app_use_hostname_as_mqtt_uuid)
-    sprintf(ha_dev_uuid, "yarrboard_%s", config.local_hostname);
+  if (_config.app_use_hostname_as_mqtt_uuid)
+    sprintf(ha_dev_uuid, "yarrboard_%s", _config.local_hostname);
   else
-    sprintf(ha_dev_uuid, "yarrboard_%s", config.uuid);
+    sprintf(ha_dev_uuid, "yarrboard_%s", _config.uuid);
 
   char topic[128];
   sprintf(topic, "homeassistant/device/%s/config", ha_dev_uuid);
@@ -205,13 +225,13 @@ void mqtt_ha_discovery()
   JsonDocument doc;
   JsonObject device = doc["dev"].to<JsonObject>();
   device["ids"] = ha_dev_uuid;
-  device["name"] = config.board_name;
+  device["name"] = _config.board_name;
   device["mf"] = YB_MANUFACTURER;
   device["mdl"] = YB_HARDWARE_VERSION;
   device["sw"] = YB_FIRMWARE_VERSION;
-  device["sn"] = config.uuid;
+  device["sn"] = _config.uuid;
   char config_url[128];
-  sprintf(config_url, "http://%s.local", config.local_hostname);
+  sprintf(config_url, "http://%s.local", _config.local_hostname);
   device["configuration_url"] = config_url;
 
   // our origin to let HA know where it came from.
@@ -263,10 +283,19 @@ void mqtt_ha_discovery()
   }
 }
 
+void MQTTController::traverseJSON(JsonVariant node, const char* topic_prefix)
+{
+  static constexpr size_t TOPIC_CAP = 256;
+  char topicBuf[TOPIC_CAP] = "";
+  strlcpy(topicBuf, topic_prefix, TOPIC_CAP);
+  size_t len = strnlen(topicBuf, TOPIC_CAP);
+
+  traverse_impl(node, topicBuf, TOPIC_CAP, len);
+}
+
 // ---- Internal helpers -------------------------------------------------------
 
-static inline void append_to_topic(char* buf, size_t& len, size_t cap,
-  const char* piece)
+void MQTTController::append_to_topic(char* buf, size_t& len, size_t cap, const char* piece)
 {
   if (!piece || !piece[0])
     return;
@@ -281,8 +310,7 @@ static inline void append_to_topic(char* buf, size_t& len, size_t cap,
   buf[len] = '\0';
 }
 
-static inline void append_index_to_topic(char* buf, size_t& len, size_t cap,
-  size_t index)
+void MQTTController::append_index_to_topic(char* buf, size_t& len, size_t cap, size_t index)
 {
   char ibuf[16];
   // Enough for size_t up to 64-bit
@@ -292,7 +320,7 @@ static inline void append_index_to_topic(char* buf, size_t& len, size_t cap,
 }
 
 // Convert a primitive JsonVariant to char* payload without String
-static inline const char* to_payload(JsonVariant v, char* out, size_t outcap)
+const char* MQTTController::to_payload(JsonVariant v, char* out, size_t outcap)
 {
   if (v.isNull()) {
     // Publish literal "null"
@@ -373,7 +401,7 @@ static inline const char* to_payload(JsonVariant v, char* out, size_t outcap)
 }
 
 // Depth-first traversal with an in-place topic buffer
-static void traverse_impl(JsonVariant node, char* topicBuf, size_t cap, size_t curLen)
+void MQTTController::traverse_impl(JsonVariant node, char* topicBuf, size_t cap, size_t curLen)
 {
   // YBP.printf("traverse_impl: %s\n", topicBuf);
 
@@ -416,15 +444,5 @@ static void traverse_impl(JsonVariant node, char* topicBuf, size_t cap, size_t c
   const char* data = to_payload(node, payload, sizeof(payload));
 
   // Ensure non-null topic string (can be empty if caller passed "")
-  mqtt_publish(topicBuf, data);
-}
-
-void mqtt_traverse_json(JsonVariant node, const char* topic_prefix)
-{
-  static constexpr size_t TOPIC_CAP = 256;
-  char topicBuf[TOPIC_CAP] = "";
-  strlcpy(topicBuf, topic_prefix, TOPIC_CAP);
-  size_t len = strnlen(topicBuf, TOPIC_CAP);
-
-  traverse_impl(node, topicBuf, TOPIC_CAP, len);
+  publish(topicBuf, data);
 }

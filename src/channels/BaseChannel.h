@@ -13,7 +13,6 @@
 #include "ProtocolController.h"
 #include "YarrboardConfig.h"
 #include "etl/array.h"
-#include "mqtt.h"
 #include <cstring> // for strncpy
 
 class BaseChannel

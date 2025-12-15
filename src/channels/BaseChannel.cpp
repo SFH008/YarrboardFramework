@@ -7,6 +7,7 @@
 */
 
 #include "channels/BaseChannel.h"
+#include "MQTTController.h"
 #include "YarrboardDebug.h"
 
 void BaseChannel::init(uint8_t id)
@@ -108,7 +109,7 @@ void BaseChannel::mqttUpdate()
 
   char topic[128];
   snprintf(topic, sizeof(topic), "%s/%s", this->channel_type, this->key);
-  mqtt_traverse_json(output, topic);
+  traverseJSON(output, topic);
 }
 
 void BaseChannel::haGenerateDiscovery(JsonVariant doc)

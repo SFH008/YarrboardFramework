@@ -8,6 +8,7 @@
 
 #include "ProtocolController.h"
 #include "ConfigManager.h"
+#include "MQTTController.h"
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 #include "utility.h"
@@ -491,9 +492,9 @@ void ProtocolController::handleSetMQTTConfig(JsonVariantConst input, JsonVariant
 
   // init our mqtt
   if (_config.app_enable_mqtt)
-    mqtt_setup();
+    _app.mqtt.setup();
   else
-    mqtt_disconnect();
+    _app.mqtt.disconnect();
 }
 
 void ProtocolController::handleSetMiscellaneousConfig(JsonVariantConst input, JsonVariant output)
@@ -1635,7 +1636,7 @@ void ProtocolController::generateStatsJSON(JsonVariant output)
   output["max_alloc_heap"] = ESP.getMaxAllocHeap();
   output["rssi"] = WiFi.RSSI();
   if (_config.app_enable_mqtt)
-    output["mqtt_connected"] = mqtt_is_connected();
+    output["mqtt_connected"] = _app.mqtt.isConnected();
 
   // what is our IP address?
   if (!strcmp(_config.wifi_mode, "ap"))

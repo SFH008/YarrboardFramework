@@ -14,6 +14,7 @@
 #define YarrboardApp_h
 
 #include "ConfigManager.h"
+#include "MQTTController.h"
 #include "NavicoController.h"
 #include "NetworkController.h"
 #include "ProtocolController.h"
@@ -26,6 +27,7 @@ class YarrboardApp
     NetworkController network;
     ProtocolController protocol;
     NavicoController navico;
+    MQTTController mqtt;
 
     YarrboardApp();
 

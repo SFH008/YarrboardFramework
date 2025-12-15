@@ -29,7 +29,8 @@ YarrboardApp::YarrboardApp() : config(*this),
                                network(*this, config),
                                protocol(*this, config),
                                networkLogger(protocol),
-                               navico(*this, config)
+                               navico(*this, config),
+                               mqtt(*this, config)
 
 {
 }
@@ -124,7 +125,7 @@ void YarrboardApp::full_setup()
 #endif
 
   // we need to do this last so that all our channels, etc are fully configured.
-  mqtt_setup();
+  mqtt.setup();
   YBP.println("MQTT ok");
 
   // we're done with startup log
@@ -195,7 +196,7 @@ void YarrboardApp::full_loop()
   protocol.loop();
   it.time("protocol_loop");
 
-  mqtt_loop();
+  mqtt.loop();
   it.time("mqtt_loop");
 
   ota_loop();
