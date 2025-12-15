@@ -113,7 +113,7 @@ void BaseChannel::mqttUpdate()
 
 void BaseChannel::haGenerateDiscovery(JsonVariant doc)
 {
-  if (app_use_hostname_as_mqtt_uuid)
+  if (config.app_use_hostname_as_mqtt_uuid)
     strncpy(ha_key, config.local_hostname, sizeof(key));
   else
     strncpy(ha_key, config.uuid, sizeof(key));

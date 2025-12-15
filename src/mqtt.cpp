@@ -40,20 +40,20 @@ unsigned long previousMQTTMillis = 0;
 void mqtt_setup()
 {
   // are we enabled?
-  if (!app_enable_mqtt)
+  if (!config.app_enable_mqtt)
     return;
 
-  mqttClient.setServer(mqtt_server);
-  mqttClient.setCredentials(mqtt_user, mqtt_pass);
+  mqttClient.setServer(config.mqtt_server);
+  mqttClient.setCredentials(config.mqtt_user, config.mqtt_pass);
 
-  if (mqtt_cert.length())
-    mqttClient.setCACert(mqtt_cert.c_str());
+  if (config.mqtt_cert.length())
+    mqttClient.setCACert(config.mqtt_cert.c_str());
 
   // on connect home hook
   mqttClient.onConnect(onMqttConnect);
 
   // home assistant connection discovery hook.
-  if (app_enable_ha_integration) {
+  if (config.app_enable_ha_integration) {
     mqttClient.onTopic("homeassistant/status", 0, [&](const char* topic, const char* payload, int retain, int qos, bool dup) {
       if (!strcmp(payload, "online"))
         mqtt_ha_discovery();
@@ -116,7 +116,7 @@ void mqtt_loop()
 #endif
 
       // separately update our Home Assistant status
-      if (app_enable_ha_integration) {
+      if (config.app_enable_ha_integration) {
 #ifdef YB_HAS_PWM_CHANNELS
         ha_update_channels(pwm_channels);
 #endif
@@ -177,7 +177,7 @@ void onMqttConnect(bool sessionPresent)
 {
   YBP.println("Connected to MQTT.");
 
-  if (app_enable_ha_integration)
+  if (config.app_enable_ha_integration)
     mqtt_ha_discovery();
 
   // look for json messages on this path...
@@ -193,7 +193,7 @@ void mqtt_ha_discovery()
 
   // how to structure our id?
   char ha_dev_uuid[128];
-  if (app_use_hostname_as_mqtt_uuid)
+  if (config.app_use_hostname_as_mqtt_uuid)
     sprintf(ha_dev_uuid, "yarrboard_%s", config.local_hostname);
   else
     sprintf(ha_dev_uuid, "yarrboard_%s", config.uuid);
@@ -205,7 +205,7 @@ void mqtt_ha_discovery()
   JsonDocument doc;
   JsonObject device = doc["dev"].to<JsonObject>();
   device["ids"] = ha_dev_uuid;
-  device["name"] = board_name;
+  device["name"] = config.board_name;
   device["mf"] = YB_MANUFACTURER;
   device["mdl"] = YB_HARDWARE_VERSION;
   device["sw"] = YB_FIRMWARE_VERSION;

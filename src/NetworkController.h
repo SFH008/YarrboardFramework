@@ -34,6 +34,8 @@ class NetworkController
     bool connectToWifi(const char* ssid, const char* pass);
     void startServices();
 
+    IPAddress apIP;
+
   private:
     YarrboardApp& _app;
     ConfigManager& _config;
@@ -42,7 +44,6 @@ class NetworkController
 
     // for making a captive portal
     //  The default android DNS
-    IPAddress apIP;
     const byte DNS_PORT = 53;
     DNSServer dnsServer;
 

@@ -26,7 +26,9 @@
   #include "piezo.h"
 #endif
 
-YarrboardApp::YarrboardApp() : network(*this, config)
+YarrboardApp::YarrboardApp() : config(*this),
+                               network(*this, config),
+                               protocol(*this, config)
 {
 }
 
@@ -74,7 +76,7 @@ void YarrboardApp::full_setup()
   server_setup();
   YBP.println("Server ok");
 
-  protocol_setup();
+  protocol.setup();
   YBP.println("Protocol ok");
 
   ota_setup();
@@ -188,7 +190,7 @@ void YarrboardApp::full_loop()
   server_loop();
   it.time("server_loop");
 
-  protocol_loop();
+  protocol.loop();
   it.time("protocol_loop");
 
   mqtt_loop();
@@ -197,7 +199,7 @@ void YarrboardApp::full_loop()
   ota_loop();
   it.time("ota_loop");
 
-  if (app_enable_mfd) {
+  if (config.app_enable_mfd) {
     navico_loop();
     it.time("navico_loop");
   }

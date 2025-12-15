@@ -161,9 +161,9 @@ void NetworkController::setupImprov()
 
   // Identify this device
   improvSerial.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32,
-    board_name,
+    _config.board_name,
     YB_FIRMWARE_VERSION,
-    board_name,
+    _config.board_name,
     device_url.c_str());
 
   improvSerial.onImprovError(_onImprovErrorStatic);
@@ -172,9 +172,9 @@ void NetworkController::setupImprov()
 
   // Identify this device
   improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32,
-    board_name,
+    _config.board_name,
     YB_FIRMWARE_VERSION,
-    board_name,
+    _config.board_name,
     device_url.c_str());
 
   improvBLE.onImprovError(_onImprovErrorStatic);

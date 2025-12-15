@@ -15,12 +15,14 @@
 
 #include "ConfigManager.h"
 #include "NetworkController.h"
+#include "protocol.h"
 
 class YarrboardApp
 {
   public:
     ConfigManager config;
     NetworkController network;
+    ProtocolController protocol;
 
     YarrboardApp();
 

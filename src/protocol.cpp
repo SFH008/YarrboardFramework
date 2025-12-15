@@ -7,6 +7,8 @@
 */
 
 #include "protocol.h"
+#include "ConfigManager.h"
+#include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 #include "utility.h"
 
@@ -38,57 +40,28 @@
   #include "piezo.h"
 #endif
 
-char board_name[YB_BOARD_NAME_LENGTH] = YB_BOARD_NAME;
-char startup_melody[YB_BOARD_NAME_LENGTH] = YB_PIEZO_DEFAULT_MELODY;
-char admin_user[YB_USERNAME_LENGTH] = YB_DEFAULT_ADMIN_USER;
-char admin_pass[YB_PASSWORD_LENGTH] = YB_DEFAULT_ADMIN_PASS;
-char guest_user[YB_USERNAME_LENGTH] = YB_DEFAULT_GUEST_USER;
-char guest_pass[YB_PASSWORD_LENGTH] = YB_DEFAULT_GUEST_PASS;
-char mqtt_server[YB_MQTT_SERVER_LENGTH] = "";
-char mqtt_user[YB_USERNAME_LENGTH] = "";
-char mqtt_pass[YB_PASSWORD_LENGTH] = "";
-String mqtt_cert = "";
-unsigned int app_update_interval = YB_DEFAULT_APP_UPDATE_INTERVAL;
-bool app_enable_mfd = YB_DEFAULT_APP_ENABLE_MFD;
-bool app_enable_api = YB_DEFAULT_APP_ENABLE_API;
-bool app_enable_serial = YB_DEFAULT_APP_ENABLE_SERIAL;
-bool app_enable_ota = YB_DEFAULT_APP_ENABLE_OTA;
-bool app_enable_ssl = YB_DEFAULT_APP_ENABLE_SSL;
-bool app_enable_mqtt = YB_DEFAULT_APP_ENABLE_SSL;
-bool app_enable_ha_integration = YB_DEFAULT_APP_ENABLE_HA_INTEGRATION;
-bool app_use_hostname_as_mqtt_uuid = YB_DEFAULT_USE_HOSTNAME_AS_MQTT_UUID;
-bool is_serial_authenticated = false;
-UserRole app_default_role = YB_DEFAULT_APP_DEFAULT_ROLE;
-UserRole serial_role = YB_DEFAULT_APP_DEFAULT_ROLE;
-UserRole api_role = YB_DEFAULT_APP_DEFAULT_ROLE;
-String app_theme = "light";
-float globalBrightness = 1.0;
+ProtocolController::ProtocolController(YarrboardApp& app, ConfigManager& config) : _app(app),
+                                                                                   _config(config)
+{
+}
 
-// for tracking our message loop
-unsigned long previousMessageMillis = 0;
+//
+//
+//.        OLD CODE BELOW.
+//
+//
 
-unsigned int receivedMessages = 0;
-unsigned int receivedMessagesPerSecond = 0;
-unsigned long totalReceivedMessages = 0;
-unsigned int sentMessages = 0;
-unsigned int sentMessagesPerSecond = 0;
-unsigned long totalSentMessages = 0;
-
-unsigned int websocketClientCount = 0;
-unsigned int httpClientCount = 0;
-
-void protocol_setup()
+void ProtocolController::setup()
 {
   // send serial a config off the bat
-  if (app_enable_serial) {
+  if (_config.app_enable_serial) {
     JsonDocument output;
-
     generateConfigJSON(output);
     serializeJson(output, Serial);
   }
 }
 
-void protocol_loop()
+void ProtocolController::loop()
 {
   // lookup our info periodically
   unsigned int messageDelta = millis() - previousMessageMillis;
@@ -110,13 +83,13 @@ void protocol_loop()
   }
 
   // any serial port customers?
-  if (app_enable_serial) {
+  if (_config.app_enable_serial) {
     if (Serial.available() > 0)
       handleSerialJson();
   }
 }
 
-void handleSerialJson()
+void ProtocolController::handleSerialJson()
 {
   JsonDocument input;
   DeserializationError err = deserializeJson(input, Serial);
@@ -143,7 +116,7 @@ void handleSerialJson()
   }
 }
 
-void handleReceivedJSON(JsonVariantConst input, JsonVariant output, YBMode mode,
+void ProtocolController::handleReceivedJSON(JsonVariantConst input, JsonVariant output, YBMode mode,
   PsychicWebSocketClient* connection)
 {
   // make sure its correct
@@ -281,7 +254,7 @@ void handleReceivedJSON(JsonVariantConst input, JsonVariant output, YBMode mode,
   return generateErrorJSON(output, error.c_str());
 }
 
-const char* getRoleText(UserRole role)
+const char* ProtocolController::getRoleText(UserRole role)
 {
   if (role == ADMIN)
     return "admin";
@@ -291,17 +264,17 @@ const char* getRoleText(UserRole role)
     return "nobody";
 }
 
-void generateHelloJSON(JsonVariant output, UserRole role)
+void ProtocolController::generateHelloJSON(JsonVariant output, UserRole role)
 {
   output["msg"] = "hello";
   output["role"] = getRoleText(role);
-  output["default_role"] = getRoleText(app_default_role);
-  output["name"] = board_name;
-  output["brightness"] = globalBrightness;
+  output["default_role"] = getRoleText(_config.app_default_role);
+  output["name"] = _config.board_name;
+  output["brightness"] = _config.globalBrightness;
   output["firmware_version"] = YB_FIRMWARE_VERSION;
 }
 
-void handleSetGeneralConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetGeneralConfig(JsonVariantConst input, JsonVariant output)
 {
   if (!input["board_name"].is<String>())
     return generateErrorJSON(output, "'board_name' is a required parameter");
@@ -314,22 +287,22 @@ void handleSetGeneralConfig(JsonVariantConst input, JsonVariant output)
   }
 
   // update variable
-  strlcpy(board_name, input["board_name"] | YB_BOARD_NAME, sizeof(board_name));
-  strlcpy(startup_melody, input["startup_melody"] | YB_PIEZO_DEFAULT_MELODY, sizeof(startup_melody));
+  strlcpy(_config.board_name, input["board_name"] | YB_BOARD_NAME, sizeof(_config.board_name));
+  strlcpy(_config.startup_melody, input["startup_melody"] | YB_PIEZO_DEFAULT_MELODY, sizeof(_config.startup_melody));
 
   // save it to file.
   char error[128];
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // give them the updated config
   generateConfigJSON(output);
 }
 
-void handleSetNetworkConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetNetworkConfig(JsonVariantConst input, JsonVariant output)
 {
   // clear our first boot flag since they submitted the network page.
-  config.is_first_boot = false;
+  _config.is_first_boot = false;
 
   char error[128];
 
@@ -367,58 +340,58 @@ void handleSetNetworkConfig(JsonVariantConst input, JsonVariant output)
   strlcpy(new_wifi_mode, input["wifi_mode"] | YB_DEFAULT_AP_MODE, sizeof(new_wifi_mode));
   strlcpy(new_wifi_ssid, input["wifi_ssid"] | YB_DEFAULT_AP_SSID, sizeof(new_wifi_ssid));
   strlcpy(new_wifi_pass, input["wifi_pass"] | YB_DEFAULT_AP_PASS, sizeof(new_wifi_pass));
-  strlcpy(config.local_hostname, input["local_hostname"] | YB_DEFAULT_HOSTNAME, sizeof(config.local_hostname));
+  strlcpy(_config.local_hostname, input["local_hostname"] | YB_DEFAULT_HOSTNAME, sizeof(_config.local_hostname));
 
   // make sure we can connect before we save
   if (!strcmp(new_wifi_mode, "client")) {
     // did we change username/password?
-    if (strcmp(new_wifi_ssid, config.wifi_ssid) || strcmp(new_wifi_pass, config.wifi_pass)) {
+    if (strcmp(new_wifi_ssid, _config.wifi_ssid) || strcmp(new_wifi_pass, _config.wifi_pass)) {
       // try connecting.
       YBP.printf("Trying new wifi %s / %s\n", new_wifi_ssid, new_wifi_pass);
-      if (connectToWifi(new_wifi_ssid, new_wifi_pass)) {
+      if (_app.network.connectToWifi(new_wifi_ssid, new_wifi_pass)) {
         // changing modes?
-        if (!strcmp(config.wifi_mode, "ap"))
+        if (!strcmp(_config.wifi_mode, "ap"))
           WiFi.softAPdisconnect();
 
         // save for local use
-        strlcpy(config.wifi_mode, new_wifi_mode, sizeof(config.wifi_mode));
-        strlcpy(config.wifi_ssid, new_wifi_ssid, sizeof(config.wifi_ssid));
-        strlcpy(config.wifi_pass, new_wifi_pass, sizeof(config.wifi_pass));
+        strlcpy(_config.wifi_mode, new_wifi_mode, sizeof(_config.wifi_mode));
+        strlcpy(_config.wifi_ssid, new_wifi_ssid, sizeof(_config.wifi_ssid));
+        strlcpy(_config.wifi_pass, new_wifi_pass, sizeof(_config.wifi_pass));
 
         // save it to file.
-        if (!config.saveConfig(error, sizeof(error)))
+        if (!_config.saveConfig(error, sizeof(error)))
           return generateErrorJSON(output, error);
       }
       // nope, setup our wifi back to default.
       else {
-        connectToWifi(config.wifi_ssid, config.wifi_pass); // go back to our old wifi.
-        startServices();
+        _app.network.connectToWifi(_config.wifi_ssid, _config.wifi_pass); // go back to our old wifi.
+        _app.network.startServices();
         return generateErrorJSON(output, "Can't connect to new WiFi.");
       }
     } else {
       // save it to file.
-      if (!config.saveConfig(error, sizeof(error)))
+      if (!_config.saveConfig(error, sizeof(error)))
         return generateErrorJSON(output, error);
     }
   }
   // okay, AP mode is easier
   else {
     // save for local use.
-    strlcpy(config.wifi_mode, new_wifi_mode, sizeof(config.wifi_mode));
-    strlcpy(config.wifi_ssid, new_wifi_ssid, sizeof(config.wifi_ssid));
-    strlcpy(config.wifi_pass, new_wifi_pass, sizeof(config.wifi_pass));
+    strlcpy(_config.wifi_mode, new_wifi_mode, sizeof(_config.wifi_mode));
+    strlcpy(_config.wifi_ssid, new_wifi_ssid, sizeof(_config.wifi_ssid));
+    strlcpy(_config.wifi_pass, new_wifi_pass, sizeof(_config.wifi_pass));
 
     // switch us into AP mode
-    setupWifi();
+    _app.network.setupWifi();
 
-    if (!config.saveConfig(error, sizeof(error)))
+    if (!_config.saveConfig(error, sizeof(error)))
       return generateErrorJSON(output, error);
 
     return generateSuccessJSON(output, "AP mode successful, please connect to new network.");
   }
 }
 
-void handleSetAuthenticationConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetAuthenticationConfig(JsonVariantConst input, JsonVariant output)
 {
   if (!input["admin_user"].is<String>())
     return generateErrorJSON(output, "'admin_user' is a required parameter");
@@ -460,87 +433,87 @@ void handleSetAuthenticationConfig(JsonVariantConst input, JsonVariant output)
   }
 
   // get our data
-  strlcpy(admin_user, input["admin_user"] | YB_DEFAULT_ADMIN_USER, sizeof(admin_user));
-  strlcpy(admin_pass, input["admin_pass"] | YB_DEFAULT_ADMIN_PASS, sizeof(admin_pass));
-  strlcpy(guest_user, input["guest_user"] | YB_DEFAULT_GUEST_USER, sizeof(guest_user));
-  strlcpy(guest_pass, input["guest_pass"] | YB_DEFAULT_GUEST_PASS, sizeof(guest_pass));
+  strlcpy(_config.admin_user, input["admin_user"] | YB_DEFAULT_ADMIN_USER, sizeof(_config.admin_user));
+  strlcpy(_config.admin_pass, input["admin_pass"] | YB_DEFAULT_ADMIN_PASS, sizeof(_config.admin_pass));
+  strlcpy(_config.guest_user, input["guest_user"] | YB_DEFAULT_GUEST_USER, sizeof(_config.guest_user));
+  strlcpy(_config.guest_pass, input["guest_pass"] | YB_DEFAULT_GUEST_PASS, sizeof(_config.guest_pass));
 
   if (input["default_role"]) {
     if (!strcmp(input["default_role"], "admin"))
-      app_default_role = ADMIN;
+      _config.app_default_role = ADMIN;
     else if (!strcmp(input["default_role"], "guest"))
-      app_default_role = GUEST;
+      _config.app_default_role = GUEST;
     else
-      app_default_role = NOBODY;
+      _config.app_default_role = NOBODY;
   }
 
   // save it to file.
   char error[128] = "Unknown";
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 }
 
-void handleSetWebServerConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetWebServerConfig(JsonVariantConst input, JsonVariant output)
 {
-  bool old_app_enable_ssl = app_enable_ssl;
+  bool old_app_enable_ssl = _config.app_enable_ssl;
 
-  app_enable_mfd = input["app_enable_mfd"] | YB_DEFAULT_APP_ENABLE_MFD;
-  app_enable_api = input["app_enable_api"] | YB_DEFAULT_APP_ENABLE_API;
-  app_enable_ssl = input["app_enable_ssl"] | app_enable_ssl;
+  _config.app_enable_mfd = input["app_enable_mfd"] | YB_DEFAULT_APP_ENABLE_MFD;
+  _config.app_enable_api = input["app_enable_api"] | YB_DEFAULT_APP_ENABLE_API;
+  _config.app_enable_ssl = input["app_enable_ssl"] | _config.app_enable_ssl;
   server_cert = input["server_cert"] | "";
   server_key = input["server_key"] | "";
 
   // save it to file.
   char error[128] = "Unknown";
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // restart the board.
-  if (old_app_enable_ssl != app_enable_ssl)
+  if (old_app_enable_ssl != _config.app_enable_ssl)
     ESP.restart();
 }
 
-void handleSetMQTTConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetMQTTConfig(JsonVariantConst input, JsonVariant output)
 {
-  app_enable_mqtt = input["app_enable_mqtt"];
-  app_enable_ha_integration = input["app_enable_ha_integration"];
-  app_use_hostname_as_mqtt_uuid = input["app_use_hostname_as_mqtt_uuid"];
+  _config.app_enable_mqtt = input["app_enable_mqtt"];
+  _config.app_enable_ha_integration = input["app_enable_ha_integration"];
+  _config.app_use_hostname_as_mqtt_uuid = input["app_use_hostname_as_mqtt_uuid"];
 
-  strlcpy(mqtt_server, input["mqtt_server"] | "", sizeof(mqtt_server));
-  strlcpy(mqtt_user, input["mqtt_user"] | "", sizeof(mqtt_user));
-  strlcpy(mqtt_pass, input["mqtt_pass"] | "", sizeof(mqtt_pass));
-  mqtt_cert = input["mqtt_cert"].as<String>();
+  strlcpy(_config.mqtt_server, input["mqtt_server"] | "", sizeof(_config.mqtt_server));
+  strlcpy(_config.mqtt_user, input["mqtt_user"] | "", sizeof(_config.mqtt_user));
+  strlcpy(_config.mqtt_pass, input["mqtt_pass"] | "", sizeof(_config.mqtt_pass));
+  _config.mqtt_cert = input["mqtt_cert"].as<String>();
 
   // save it to file.
   char error[128] = "Unknown";
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // init our mqtt
-  if (app_enable_mqtt)
+  if (_config.app_enable_mqtt)
     mqtt_setup();
   else
     mqtt_disconnect();
 }
 
-void handleSetMiscellaneousConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetMiscellaneousConfig(JsonVariantConst input, JsonVariant output)
 {
-  app_enable_serial = input["app_enable_serial"] | YB_DEFAULT_APP_ENABLE_SERIAL;
-  app_enable_ota = input["app_enable_ota"] | YB_DEFAULT_APP_ENABLE_OTA;
+  _config.app_enable_serial = input["app_enable_serial"] | YB_DEFAULT_APP_ENABLE_SERIAL;
+  _config.app_enable_ota = input["app_enable_ota"] | YB_DEFAULT_APP_ENABLE_OTA;
 
   // save it to file.
   char error[128] = "Unknown";
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // init our ota.
-  if (app_enable_ota)
+  if (_config.app_enable_ota)
     ota_setup();
   else
     ota_end();
 }
 
-void handleSaveConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSaveConfig(JsonVariantConst input, JsonVariant output)
 {
   char error[128] = "Unknown";
 
@@ -559,18 +532,18 @@ void handleSaveConfig(JsonVariantConst input, JsonVariant output)
   }
 
   // test the validity by loading it...
-  if (!config.loadConfigFromJSON(cfg, error, sizeof(error)))
+  if (!_config.loadConfigFromJSON(cfg, error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // write it!
-  if (!config.saveConfig(error, sizeof(error)))
+  if (!_config.saveConfig(error, sizeof(error)))
     return generateErrorJSON(output, error);
 
   // restart the board.
   ESP.restart();
 }
 
-void handleLogin(JsonVariantConst input, JsonVariant output, YBMode mode,
+void ProtocolController::handleLogin(JsonVariantConst input, JsonVariant output, YBMode mode,
   PsychicWebSocketClient* connection)
 {
   if (!input["user"].is<String>())
@@ -587,15 +560,15 @@ void handleLogin(JsonVariantConst input, JsonVariant output, YBMode mode,
 
   // check their credentials
   bool is_authenticated = false;
-  UserRole role = app_default_role;
+  UserRole role = _config.app_default_role;
 
-  if (!strcmp(admin_user, myuser) && !strcmp(admin_pass, mypass)) {
+  if (!strcmp(_config.admin_user, myuser) && !strcmp(_config.admin_pass, mypass)) {
     is_authenticated = true;
     role = ADMIN;
     output["role"] = "admin";
   }
 
-  if (!strcmp(guest_user, myuser) && !strcmp(guest_pass, mypass)) {
+  if (!strcmp(_config.guest_user, myuser) && !strcmp(_config.guest_pass, mypass)) {
     is_authenticated = true;
     role = GUEST;
     output["role"] = "guest";
@@ -609,7 +582,7 @@ void handleLogin(JsonVariantConst input, JsonVariant output, YBMode mode,
         return generateErrorJSON(output, "Too many connections.");
     } else if (mode == YBP_MODE_SERIAL) {
       is_serial_authenticated = true;
-      serial_role = role;
+      _config.serial_role = role;
     }
 
     output["msg"] = "login";
@@ -623,7 +596,7 @@ void handleLogin(JsonVariantConst input, JsonVariant output, YBMode mode,
   return generateErrorJSON(output, "Wrong username/password.");
 }
 
-void handleLogout(JsonVariantConst input, JsonVariant output, YBMode mode,
+void ProtocolController::handleLogout(JsonVariantConst input, JsonVariant output, YBMode mode,
   PsychicWebSocketClient* connection)
 {
   if (!isLoggedIn(input, mode, connection))
@@ -637,29 +610,29 @@ void handleLogout(JsonVariantConst input, JsonVariant output, YBMode mode,
     // connection->close();
   } else if (mode == YBP_MODE_SERIAL) {
     is_serial_authenticated = false;
-    serial_role = app_default_role;
+    _config.serial_role = _config.app_default_role;
   }
 }
 
-void handleRestart(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleRestart(JsonVariantConst input, JsonVariant output)
 {
   YBP.println("Restarting board.");
 
   ESP.restart();
 }
 
-void handleCrashMe(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleCrashMe(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_IS_DEVELOPMENT
   crash_me_hard();
 #endif
 }
 
-void handleFactoryReset(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleFactoryReset(JsonVariantConst input, JsonVariant output)
 {
   // delete all our prefs
-  config.preferences.clear();
-  config.preferences.end();
+  _config.preferences.clear();
+  _config.preferences.end();
 
   // clean up littlefs
   LittleFS.format();
@@ -668,7 +641,7 @@ void handleFactoryReset(JsonVariantConst input, JsonVariant output)
   ESP.restart();
 }
 
-void handleOTAStart(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleOTAStart(JsonVariantConst input, JsonVariant output)
 {
   // look for new firmware
   bool updatedNeeded = FOTA.execHTTPcheck();
@@ -678,7 +651,7 @@ void handleOTAStart(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Firmware already up to date.");
 }
 
-void handlePlaySound(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handlePlaySound(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_PIEZO
   // expect: "melody": "name"
@@ -741,7 +714,7 @@ void handlePlaySound(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleSetPWMChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetPWMChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_PWM_CHANNELS
 
@@ -807,7 +780,7 @@ void handleSetPWMChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleConfigPWMChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleConfigPWMChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_PWM_CHANNELS
   char error[128];
@@ -834,7 +807,7 @@ void handleConfigPWMChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleTogglePWMChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleTogglePWMChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_PWM_CHANNELS
 
@@ -868,7 +841,7 @@ void handleTogglePWMChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleConfigRelayChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleConfigRelayChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_RELAY_CHANNELS
   char error[128];
@@ -895,7 +868,7 @@ void handleConfigRelayChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleSetRelayChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetRelayChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_RELAY_CHANNELS
   char prefIndex[YB_PREF_KEY_LENGTH];
@@ -941,7 +914,7 @@ void handleSetRelayChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleToggleRelayChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleToggleRelayChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_RELAY_CHANNELS
   // load our channel
@@ -973,7 +946,7 @@ void handleToggleRelayChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleConfigServoChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleConfigServoChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_SERVO_CHANNELS
   char error[128];
@@ -1000,7 +973,7 @@ void handleConfigServoChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleSetServoChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetServoChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_SERVO_CHANNELS
   // load our channel
@@ -1026,7 +999,7 @@ void handleSetServoChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleConfigStepperChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleConfigStepperChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_STEPPER_CHANNELS
   char error[128];
@@ -1052,7 +1025,7 @@ void handleConfigStepperChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleSetStepperChannel(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetStepperChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_STEPPER_CHANNELS
   // load our channel
@@ -1086,7 +1059,7 @@ void handleSetStepperChannel(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleConfigADC(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleConfigADC(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_ADC_CHANNELS
   char error[128] = "Unknown";
@@ -1206,7 +1179,7 @@ void handleConfigADC(JsonVariantConst input, JsonVariant output)
 #endif
 }
 
-void handleSetTheme(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetTheme(JsonVariantConst input, JsonVariant output)
 {
   if (!input["theme"].is<String>())
     return generateErrorJSON(output, "'theme' is a required parameter");
@@ -1217,12 +1190,12 @@ void handleSetTheme(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output,
       "'theme' must either be 'light' or 'dark'");
 
-  app_theme = temp;
+  _config.app_theme = temp;
 
   sendThemeUpdate();
 }
 
-void handleSetBrightness(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetBrightness(JsonVariantConst input, JsonVariant output)
 {
   if (input["brightness"].is<float>()) {
     float brightness = input["brightness"];
@@ -1233,7 +1206,7 @@ void handleSetBrightness(JsonVariantConst input, JsonVariant output)
     else if (brightness > 1)
       return generateErrorJSON(output, "Brightness must be <= 1");
 
-    globalBrightness = brightness;
+    _config.globalBrightness = brightness;
 
 // TODO: need to put this on a time delay
 // preferences.putFloat("brightness", globalBrightness);
@@ -1250,7 +1223,7 @@ void handleSetBrightness(JsonVariantConst input, JsonVariant output)
 }
 
 #ifdef YB_IS_BRINEOMATIC
-void handleStartWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleStartWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (strcmp(wm.getStatus(), "IDLE"))
     return generateErrorJSON(output, "Watermaker is not in IDLE mode.");
@@ -1266,7 +1239,7 @@ void handleStartWatermaker(JsonVariantConst input, JsonVariant output)
     wm.start();
 }
 
-void handleFlushWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleFlushWatermaker(JsonVariantConst input, JsonVariant output)
 {
   uint64_t duration = input["duration"];
   float volume = input["volume"];
@@ -1282,7 +1255,7 @@ void handleFlushWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker is not in IDLE or PICKLED modes.");
 }
 
-void handlePickleWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handlePickleWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (!input["duration"].is<JsonVariantConst>())
     return generateErrorJSON(output, "'duration' is a required parameter");
@@ -1298,7 +1271,7 @@ void handlePickleWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker is not in IDLE mode.");
 }
 
-void handleDepickleWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleDepickleWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (!input["duration"].is<JsonVariantConst>())
     return generateErrorJSON(output, "'duration' is a required parameter");
@@ -1314,7 +1287,7 @@ void handleDepickleWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker is not in PICKLED mode.");
 }
 
-void handleStopWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleStopWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (!strcmp(wm.getStatus(), "RUNNING") || !strcmp(wm.getStatus(), "FLUSHING") || !strcmp(wm.getStatus(), "PICKLING") || !strcmp(wm.getStatus(), "DEPICKLING"))
     wm.stop();
@@ -1322,7 +1295,7 @@ void handleStopWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker must be in RUNNING, FLUSHING, or PICKLING mode to stop.");
 }
 
-void handleIdleWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleIdleWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (!strcmp(wm.getStatus(), "MANUAL"))
     wm.idle();
@@ -1330,7 +1303,7 @@ void handleIdleWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker must be in MANUAL mode to IDLE.");
 }
 
-void handleManualWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleManualWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (!strcmp(wm.getStatus(), "IDLE"))
     wm.manual();
@@ -1338,7 +1311,7 @@ void handleManualWatermaker(JsonVariantConst input, JsonVariant output)
     return generateErrorJSON(output, "Watermaker must be in IDLE mode to switch to MANUAL.");
 }
 
-void handleSetWatermaker(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleSetWatermaker(JsonVariantConst input, JsonVariant output)
 {
   if (input["water_temperature"]) {
     float temp = input["water_temperature"];
@@ -1443,7 +1416,7 @@ void handleSetWatermaker(JsonVariantConst input, JsonVariant output)
   }
 }
 
-void handleBrineomaticSaveGeneralConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleBrineomaticSaveGeneralConfig(JsonVariantConst input, JsonVariant output)
 {
   // we need a mutable format for the validation
   JsonDocument doc;
@@ -1459,7 +1432,7 @@ void handleBrineomaticSaveGeneralConfig(JsonVariantConst input, JsonVariant outp
     return generateErrorJSON(output, error);
 }
 
-void handleBrineomaticSaveHardwareConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleBrineomaticSaveHardwareConfig(JsonVariantConst input, JsonVariant output)
 {
   // we need a mutable format for the validation
   JsonDocument doc;
@@ -1481,7 +1454,7 @@ void handleBrineomaticSaveHardwareConfig(JsonVariantConst input, JsonVariant out
   ESP.restart();
 }
 
-void handleBrineomaticSaveSafeguardsConfig(JsonVariantConst input, JsonVariant output)
+void ProtocolController::handleBrineomaticSaveSafeguardsConfig(JsonVariantConst input, JsonVariant output)
 {
   // we need a mutable format for the validation
   JsonDocument doc;
@@ -1500,33 +1473,33 @@ void handleBrineomaticSaveSafeguardsConfig(JsonVariantConst input, JsonVariant o
 
 #endif
 
-void generateFullConfigMessage(JsonVariant output)
+void ProtocolController::generateFullConfigMessage(JsonVariant output)
 {
   // build our message
   output["msg"] = "full_config";
   JsonObject cfg = output["config"].to<JsonObject>();
 
   // separate call to make a clean config.
-  config.generateFullConfig(cfg);
+  _config.generateFullConfig(cfg);
 }
 
-void generateConfigJSON(JsonVariant output)
+void ProtocolController::generateConfigJSON(JsonVariant output)
 {
   // extra info
   output["msg"] = "config";
-  output["hostname"] = config.local_hostname;
-  output["use_ssl"] = app_enable_ssl;
-  output["enable_ota"] = app_enable_ota;
-  output["enable_mqtt"] = app_enable_mqtt;
-  output["default_role"] = getRoleText(app_default_role);
-  output["brightness"] = globalBrightness;
+  output["hostname"] = _config.local_hostname;
+  output["use_ssl"] = _config.app_enable_ssl;
+  output["enable_ota"] = _config.app_enable_ota;
+  output["enable_mqtt"] = _config.app_enable_mqtt;
+  output["default_role"] = getRoleText(_config.app_default_role);
+  output["brightness"] = _config.globalBrightness;
   output["git_hash"] = GIT_HASH;
   output["build_time"] = BUILD_TIME;
 
 #ifdef YB_HAS_PIEZO
   generateMelodyJSON(output);
 #endif
-  config.generateBoardConfig(output);
+  _config.generateBoardConfig(output);
 
   output["is_development"] = YB_IS_DEVELOPMENT;
 
@@ -1541,11 +1514,11 @@ void generateConfigJSON(JsonVariant output)
 #endif
 
   // do we want to flag it for config?
-  if (config.is_first_boot)
+  if (_config.is_first_boot)
     output["first_boot"] = true;
 }
 
-void generateUpdateJSON(JsonVariant output)
+void ProtocolController::generateUpdateJSON(JsonVariant output)
 {
   output["msg"] = "update";
   output["uptime"] = esp_timer_get_time();
@@ -1608,7 +1581,7 @@ void generateUpdateJSON(JsonVariant output)
 #endif
 }
 
-void generateFastUpdateJSON(JsonVariant output)
+void ProtocolController::generateFastUpdateJSON(JsonVariant output)
 {
   output["msg"] = "update";
   output["fast"] = 1;
@@ -1643,11 +1616,11 @@ void generateFastUpdateJSON(JsonVariant output)
 #endif
 }
 
-void generateStatsJSON(JsonVariant output)
+void ProtocolController::generateStatsJSON(JsonVariant output)
 {
   // some basic statistics and info
   output["msg"] = "stats";
-  output["uuid"] = config.uuid;
+  output["uuid"] = _config.uuid;
   output["received_message_total"] = totalReceivedMessages;
   output["received_message_mps"] = receivedMessagesPerSecond;
   output["sent_message_total"] = totalSentMessages;
@@ -1661,12 +1634,12 @@ void generateStatsJSON(JsonVariant output)
   output["min_free_heap"] = ESP.getMinFreeHeap();
   output["max_alloc_heap"] = ESP.getMaxAllocHeap();
   output["rssi"] = WiFi.RSSI();
-  if (app_enable_mqtt)
+  if (_config.app_enable_mqtt)
     output["mqtt_connected"] = mqtt_is_connected();
 
   // what is our IP address?
-  if (!strcmp(config.wifi_mode, "ap"))
-    output["ip_address"] = apIP;
+  if (!strcmp(_config.wifi_mode, "ap"))
+    output["ip_address"] = _app.network.apIP;
   else
     output["ip_address"] = WiFi.localIP();
 
@@ -1703,57 +1676,57 @@ void generateStatsJSON(JsonVariant output)
 #endif
 }
 
-void generateNetworkConfigMessage(JsonVariant output)
+void ProtocolController::generateNetworkConfigMessage(JsonVariant output)
 {
   // our identifying info
   output["msg"] = "network_config";
-  config.generateNetworkConfig(output);
+  _config.generateNetworkConfig(output);
 }
 
-void generateAppConfigMessage(JsonVariant output)
+void ProtocolController::generateAppConfigMessage(JsonVariant output)
 {
   // our identifying info
   output["msg"] = "app_config";
-  config.generateAppConfig(output);
+  _config.generateAppConfig(output);
 }
 
-void generateOTAProgressUpdateJSON(JsonVariant output, float progress)
+void ProtocolController::generateOTAProgressUpdateJSON(JsonVariant output, float progress)
 {
   output["msg"] = "ota_progress";
   output["progress"] = round2(progress);
 }
 
-void generateOTAProgressFinishedJSON(JsonVariant output)
+void ProtocolController::generateOTAProgressFinishedJSON(JsonVariant output)
 {
   output["msg"] = "ota_finished";
 }
 
-void generateErrorJSON(JsonVariant output, const char* error)
+void ProtocolController::generateErrorJSON(JsonVariant output, const char* error)
 {
   output["msg"] = "status";
   output["status"] = "error";
   output["message"] = error;
 }
 
-void generateSuccessJSON(JsonVariant output, const char* success)
+void ProtocolController::generateSuccessJSON(JsonVariant output, const char* success)
 {
   output["msg"] = "status";
   output["status"] = "success";
   output["message"] = success;
 }
 
-void generateLoginRequiredJSON(JsonVariant output)
+void ProtocolController::generateLoginRequiredJSON(JsonVariant output)
 {
   generateErrorJSON(output, "You must be logged in.");
 }
 
-void generatePongJSON(JsonVariant output) { output["pong"] = millis(); }
+void ProtocolController::generatePongJSON(JsonVariant output) { output["pong"] = millis(); }
 
-void sendThemeUpdate()
+void ProtocolController::sendThemeUpdate()
 {
   JsonDocument output;
   output["msg"] = "set_theme";
-  output["theme"] = app_theme;
+  output["theme"] = _config.app_theme;
 
   // dynamically allocate our buffer
   size_t jsonSize = measureJson(output);
@@ -1770,11 +1743,11 @@ void sendThemeUpdate()
   }
 }
 
-void sendBrightnessUpdate()
+void ProtocolController::sendBrightnessUpdate()
 {
   JsonDocument output;
   output["msg"] = "set_brightness";
-  output["brightness"] = globalBrightness;
+  output["brightness"] = _config.globalBrightness;
 
   // dynamically allocate our buffer
   size_t jsonSize = measureJson(output);
@@ -1791,7 +1764,7 @@ void sendBrightnessUpdate()
   }
 }
 
-void sendFastUpdate()
+void ProtocolController::sendFastUpdate()
 {
   JsonDocument output;
   generateFastUpdateJSON(output);
@@ -1811,7 +1784,7 @@ void sendFastUpdate()
   }
 }
 
-void sendOTAProgressUpdate(float progress)
+void ProtocolController::sendOTAProgressUpdate(float progress)
 {
   JsonDocument output;
   generateOTAProgressUpdateJSON(output, progress);
@@ -1831,7 +1804,7 @@ void sendOTAProgressUpdate(float progress)
   }
 }
 
-void sendOTAProgressFinished()
+void ProtocolController::sendOTAProgressFinished()
 {
   JsonDocument output;
   generateOTAProgressFinishedJSON(output);
@@ -1851,7 +1824,7 @@ void sendOTAProgressFinished()
   }
 }
 
-void sendDebug(const char* message)
+void ProtocolController::sendDebug(const char* message)
 {
   JsonDocument output;
   output["debug"] = message;
@@ -1872,10 +1845,10 @@ void sendDebug(const char* message)
   }
 }
 
-void sendToAll(const char* jsonString, UserRole auth_level)
+void ProtocolController::sendToAll(const char* jsonString, UserRole auth_level)
 {
   sendToAllWebsockets(jsonString, auth_level);
 
-  if (app_enable_serial && serial_role >= auth_level)
+  if (_config.app_enable_serial && _config.serial_role >= auth_level)
     Serial.println(jsonString);
 }

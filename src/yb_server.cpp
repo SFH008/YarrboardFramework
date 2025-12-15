@@ -25,7 +25,7 @@ void server_setup()
   // init our authentication stuff
   for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
     authenticatedClients[i].socket = 0;
-    authenticatedClients[i].role = app_default_role;
+    authenticatedClients[i].role = config.app_default_role;
   }
 
   // prepare our message queue
@@ -34,7 +34,7 @@ void server_setup()
     YBP.printf("Failed to create queue= %p\n", wsRequests);
 
   // do we want secure or not?
-  if (app_enable_ssl && server_cert.length() && server_key.length()) {
+  if (config.app_enable_ssl && server_cert.length() && server_key.length()) {
     server = new PsychicHttpsServer(443);
     server->setCertificate(server_cert.c_str(), server_key.c_str());
     YBP.println("SSL enabled");
@@ -102,8 +102,8 @@ void server_setup()
     JsonDocument doc;
 
     // Root values
-    doc["short_name"] = board_name;
-    doc["name"] = board_name;
+    doc["short_name"] = config.board_name;
+    doc["name"] = config.board_name;
 
     // icons array
     JsonArray icons = doc["icons"].to<JsonArray>();
@@ -242,7 +242,7 @@ void server_loop()
 void sendToAllWebsockets(const char* jsonString, UserRole auth_level)
 {
   // make sure we're allowed to see the message
-  if (auth_level > app_default_role) {
+  if (auth_level > config.app_default_role) {
     for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
       if (authenticatedClients[i].socket) {
         // make sure its a valid client
@@ -300,7 +300,7 @@ esp_err_t handleWebServerRequest(JsonVariant input, PsychicRequest* request, Psy
   if (request->hasParam("pass"))
     input["pass"] = request->getParam("pass")->value();
 
-  if (app_enable_api) {
+  if (config.app_enable_api) {
     isApiClientLoggedIn(input);
     handleReceivedJSON(input, output, YBP_MODE_HTTP);
   } else
@@ -440,11 +440,11 @@ UserRole getUserRole(JsonVariantConst input, byte mode,
   if (mode == YBP_MODE_WEBSOCKET)
     return getWebsocketRole(input, connection);
   else if (mode == YBP_MODE_HTTP)
-    return api_role;
+    return config.api_role;
   else if (mode == YBP_MODE_SERIAL)
-    return serial_role;
+    return config.serial_role;
   else
-    return app_default_role;
+    return config.app_default_role;
 }
 
 bool isWebsocketClientLoggedIn(JsonVariantConst doc,
@@ -466,7 +466,7 @@ UserRole getWebsocketRole(JsonVariantConst doc,
     if (authenticatedClients[i].socket == client->socket())
       return authenticatedClients[i].role;
 
-  return app_default_role;
+  return config.app_default_role;
 }
 
 bool checkLoginCredentials(JsonVariantConst doc, UserRole& role)
@@ -483,18 +483,18 @@ bool checkLoginCredentials(JsonVariantConst doc, UserRole& role)
   strlcpy(mypass, doc["pass"] | "", sizeof(myuser));
 
   // morpheus... i'm in.
-  if (!strcmp(admin_user, myuser) && !strcmp(admin_pass, mypass)) {
+  if (!strcmp(config.admin_user, myuser) && !strcmp(config.admin_pass, mypass)) {
     role = ADMIN;
     return true;
   }
 
-  if (!strcmp(guest_user, myuser) && !strcmp(guest_pass, mypass)) {
+  if (!strcmp(config.guest_user, myuser) && !strcmp(config.guest_pass, mypass)) {
     role = GUEST;
     return true;
   }
 
   // default to fail then.
-  role = app_default_role;
+  role = config.app_default_role;
   return false;
 }
 
@@ -503,12 +503,12 @@ bool isSerialClientLoggedIn(JsonVariantConst doc)
   if (is_serial_authenticated)
     return true;
   else
-    return checkLoginCredentials(doc, serial_role);
+    return checkLoginCredentials(doc, config.serial_role);
 }
 
 bool isApiClientLoggedIn(JsonVariantConst doc)
 {
-  return checkLoginCredentials(doc, api_role);
+  return checkLoginCredentials(doc, config.api_role);
 }
 
 bool addClientToAuthList(PsychicWebSocketClient* client, UserRole role)
@@ -542,7 +542,7 @@ void removeClientFromAuthList(PsychicWebSocketClient* client)
     // did we find an empty slot?
     if (authenticatedClients[i].socket == client->socket()) {
       authenticatedClients[i].socket = 0;
-      authenticatedClients[i].role = app_default_role;
+      authenticatedClients[i].role = config.app_default_role;
     }
   }
 }

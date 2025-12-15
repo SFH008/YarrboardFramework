@@ -95,17 +95,17 @@ Channel* lookupChannel(JsonVariantConst input, JsonVariant output, etl::array<Ch
       char* endPtr = nullptr;
       id = strtoul(idStr, &endPtr, 10);
       if (endPtr == idStr || *endPtr != '\0') {
-        generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
+        ProtocolController::generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
         return nullptr;
       }
     } else {
-      generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
+      ProtocolController::generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
       return nullptr;
     }
 
     Channel* ch = getChannelById(id, channels);
     if (!ch) {
-      generateErrorJSON(output, "Invalid channel id");
+      ProtocolController::generateErrorJSON(output, "Invalid channel id");
       return nullptr;
     }
     return ch;
@@ -113,19 +113,19 @@ Channel* lookupChannel(JsonVariantConst input, JsonVariant output, etl::array<Ch
 
   if (!vKey.isNull()) {
     if (!vKey.is<const char*>()) {
-      generateErrorJSON(output, "Parameter 'key' must be a string");
+      ProtocolController::generateErrorJSON(output, "Parameter 'key' must be a string");
       return nullptr;
     }
     const char* key = vKey.as<const char*>();
     Channel* ch = getChannelByKey(key, channels);
     if (!ch) {
-      generateErrorJSON(output, "Invalid channel key");
+      ProtocolController::generateErrorJSON(output, "Invalid channel key");
       return nullptr;
     }
     return ch;
   }
 
-  generateErrorJSON(output, "You must pass in either 'id' or 'key' as a required parameter");
+  ProtocolController::generateErrorJSON(output, "You must pass in either 'id' or 'key' as a required parameter");
   return nullptr;
 }
 

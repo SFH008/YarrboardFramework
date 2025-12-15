@@ -36,10 +36,10 @@ unsigned long ota_last_message = 0;
 
 void ota_setup()
 {
-  if (app_enable_ota) {
+  if (config.app_enable_ota) {
     ArduinoOTA.setHostname(config.local_hostname);
     ArduinoOTA.setPort(3232);
-    ArduinoOTA.setPassword(admin_pass);
+    ArduinoOTA.setPassword(config.admin_pass);
     ArduinoOTA.begin();
   }
 
@@ -87,13 +87,13 @@ void ota_loop()
     doOTAUpdate = false;
   }
 
-  if (app_enable_ota) {
+  if (config.app_enable_ota) {
     ArduinoOTA.handle();
   }
 }
 
 void ota_end()
 {
-  if (!app_enable_ota)
+  if (!config.app_enable_ota)
     ArduinoOTA.end();
 }

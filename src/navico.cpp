@@ -31,21 +31,21 @@ void navico_loop()
 
     char urlBuf[48];
     IPAddress ip = WiFi.localIP();
-    snprintf(urlBuf, sizeof(urlBuf), app_enable_ssl ? "https://%u.%u.%u.%u:443" : "http://%u.%u.%u.%u:80", ip[0], ip[1], ip[2], ip[3]);
+    snprintf(urlBuf, sizeof(urlBuf), config.app_enable_ssl ? "https://%u.%u.%u.%u:443" : "http://%u.%u.%u.%u:80", ip[0], ip[1], ip[2], ip[3]);
     url = urlBuf; // assign once
 
     // generate our config JSON
     JsonDocument doc;
 
     doc["Version"] = "1";
-    doc["Source"] = board_name;
+    doc["Source"] = config.board_name;
     doc["IP"] = WiFi.localIP();
-    doc["FeatureName"] = String(board_name) + " Webapp";
+    doc["FeatureName"] = String(config.board_name) + " Webapp";
 
     JsonObject Text_0 = doc["Text"].add<JsonObject>();
     Text_0["Language"] = "en";
-    Text_0["Name"] = board_name;
-    Text_0["Description"] = String(board_name) + " Webapp";
+    Text_0["Name"] = config.board_name;
+    Text_0["Description"] = String(config.board_name) + " Webapp";
     doc["Icon"] = url + "/logo.png";
     doc["URL"] = url + "/";
     doc["OnlyShowOnClientIP"] = "true";

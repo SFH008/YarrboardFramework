@@ -1,9 +1,10 @@
 #include "ConfigManager.h"
+#include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 #include "protocol.h"
 #include "yb_server.h"
 
-ConfigManager::ConfigManager() : is_first_boot(true)
+ConfigManager::ConfigManager(YarrboardApp& app) : _app(app), is_first_boot(true)
 {
 }
 
@@ -221,7 +222,7 @@ void ConfigManager::generateAppConfig(JsonVariant output)
 {
   // our identifying info
   output["startup_melody"] = startup_melody;
-  output["default_role"] = getRoleText(app_default_role);
+  output["default_role"] = _app.protocol.getRoleText(app_default_role);
   output["admin_user"] = admin_user;
   output["admin_pass"] = admin_pass;
   output["guest_user"] = guest_user;
@@ -526,5 +527,3 @@ bool ConfigManager::loadBoardConfigFromJSON(JsonVariant config, char* error, siz
 
   return result;
 }
-
-ConfigManager config;
