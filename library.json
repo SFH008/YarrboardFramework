@@ -1,11 +1,11 @@
 {
-  "name": "yarrboard-framework",
+  "name": "YarrboardFramework",
   "version": "1.0.0",
   "description": "Framework for esp32 with http, sockets, MQTT and more",
   "keywords": "network,http,https,tcp,ssl,tls,websocket,espasyncwebserver",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hoeken/yarrboard-framework"
+    "url": "https://github.com/hoeken/YarrboardFramework"
   },
   "authors": [
     {
@@ -20,7 +20,7 @@
       "name": "platformio",
       "base": "examples/platformio",
       "files": [
-        "src/main.cpp"
+        "main.cpp"
       ]
     }
   ],
@@ -35,13 +35,13 @@
     {
       "owner": "hoeken",
       "name": "PsychicHttp",
-      "version": "^2.0.0"
+      "version": "^2.1.1"
     }
   ],
   "export": {
     "include": [
       "examples/platformio",
-      "src",
+      "src",W
       "library.json",
       "library.properties",
       "LICENSE",

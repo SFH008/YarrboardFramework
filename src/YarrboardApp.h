@@ -13,7 +13,6 @@
 #ifndef YarrboardApp_h
 #define YarrboardApp_h
 
-#include "YarrboardVersion.h"
 #include <PsychicHttp.h>
 
 class YarrboardApp
