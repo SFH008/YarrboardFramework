@@ -11,6 +11,7 @@
 
 #include "yb_server.h"
 #include <Arduino.h>
+#include <WiFi.h>
 
 class YarrboardApp;
 class ConfigManager;

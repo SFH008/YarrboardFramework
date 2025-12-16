@@ -10,6 +10,7 @@
 #include "ConfigManager.h"
 #include "YarrboardDebug.h"
 
+
 NavicoController::NavicoController(YarrboardApp& app, ConfigManager& config) : _app(app),
                                                                                _config(config),
                                                                                MULTICAST_GROUP_IP(239, 2, 1, 1)

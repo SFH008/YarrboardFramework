@@ -17,6 +17,7 @@
 #include "MQTTController.h"
 #include "NavicoController.h"
 #include "NetworkController.h"
+#include "OTAController.h"
 #include "ProtocolController.h"
 #include "YarrboardDebug.h"
 
@@ -28,6 +29,7 @@ class YarrboardApp
     ProtocolController protocol;
     NavicoController navico;
     MQTTController mqtt;
+    OTAController ota;
 
     YarrboardApp();
 

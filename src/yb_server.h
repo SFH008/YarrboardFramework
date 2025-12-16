@@ -17,9 +17,6 @@
 #include <PsychicHttpsServer.h>
 #include <freertos/queue.h>
 
-// #include "adchelper.h"
-#include "ota.h"
-
 // generated at build by running "gulp" in the firmware directory.
 #include "index.html.gz.h"
 

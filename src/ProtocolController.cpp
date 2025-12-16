@@ -509,9 +509,9 @@ void ProtocolController::handleSetMiscellaneousConfig(JsonVariantConst input, Js
 
   // init our ota.
   if (_config.app_enable_ota)
-    ota_setup();
+    _app.ota.setup();
   else
-    ota_end();
+    _app.ota.end();
 }
 
 void ProtocolController::handleSaveConfig(JsonVariantConst input, JsonVariant output)
@@ -644,10 +644,8 @@ void ProtocolController::handleFactoryReset(JsonVariantConst input, JsonVariant 
 
 void ProtocolController::handleOTAStart(JsonVariantConst input, JsonVariant output)
 {
-  // look for new firmware
-  bool updatedNeeded = FOTA.execHTTPcheck();
-  if (updatedNeeded)
-    doOTAUpdate = true;
+  if (_app.ota.checkOTA())
+    _app.ota.startOTA();
   else
     return generateErrorJSON(output, "Firmware already up to date.");
 }

@@ -30,7 +30,8 @@ YarrboardApp::YarrboardApp() : config(*this),
                                protocol(*this, config),
                                networkLogger(protocol),
                                navico(*this, config),
-                               mqtt(*this, config)
+                               mqtt(*this, config),
+                               ota(*this, config)
 
 {
 }
@@ -82,7 +83,7 @@ void YarrboardApp::full_setup()
   protocol.setup();
   YBP.println("Protocol ok");
 
-  ota_setup();
+  ota.setup();
   YBP.println("OTA ok");
 
 #ifdef YB_HAS_BUS_VOLTAGE
@@ -199,7 +200,7 @@ void YarrboardApp::full_loop()
   mqtt.loop();
   it.time("mqtt_loop");
 
-  ota_loop();
+  ota.loop();
   it.time("ota_loop");
 
   if (config.app_enable_mfd) {
