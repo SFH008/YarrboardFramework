@@ -18,10 +18,8 @@ AuthController::AuthController(YarrboardApp& app) : BaseController(app, "auth")
 bool AuthController::setup()
 {
   // init our authentication stuff
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
-    authenticatedClients[i].socket = 0;
-    authenticatedClients[i].role = _cfg.app_default_role;
-  }
+  authenticatedClients.clear();
+  return true;
 }
 
 bool AuthController::logClientIn(PsychicWebSocketClient* client, UserRole role)
@@ -68,8 +66,8 @@ UserRole AuthController::getUserRole(JsonVariantConst input, byte mode, PsychicW
 bool AuthController::isWebsocketClientLoggedIn(JsonVariantConst doc, PsychicWebSocketClient* client)
 {
   // are they in our auth array?
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++)
-    if (authenticatedClients[i].socket == client->socket())
+  for (auto& authClient : authenticatedClients)
+    if (authClient.socket == client->socket())
       return true;
 
   return false;
@@ -78,9 +76,9 @@ bool AuthController::isWebsocketClientLoggedIn(JsonVariantConst doc, PsychicWebS
 UserRole AuthController::getWebsocketRole(JsonVariantConst doc, PsychicWebSocketClient* client)
 {
   // are they in our auth array?
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++)
-    if (authenticatedClients[i].socket == client->socket())
-      return authenticatedClients[i].role;
+  for (auto& authClient : authenticatedClients)
+    if (authClient.socket == client->socket())
+      return authClient.role;
 
   return _cfg.app_default_role;
 }
@@ -129,36 +127,32 @@ bool AuthController::isApiClientLoggedIn(JsonVariantConst doc)
 
 bool AuthController::addClientToAuthList(PsychicWebSocketClient* client, UserRole role)
 {
-  byte i;
-  for (i = 0; i < YB_CLIENT_LIMIT; i++) {
-    // did we find an empty slot?
-    if (!authenticatedClients[i].socket) {
-      authenticatedClients[i].socket = client->socket();
-      authenticatedClients[i].role = role;
-      break;
+  // check if already authenticated
+  for (auto& authClient : authenticatedClients) {
+    if (authClient.socket == client->socket()) {
+      // update role just in case
+      authClient.role = role;
+      return true;
     }
-
-    // are we already authenticated?
-    if (authenticatedClients[i].socket == client->socket())
-      break;
   }
 
-  // did we not find a spot?
-  if (i == YB_CLIENT_LIMIT) {
-    return false;
+  // check for space
+  if (authenticatedClients.full()) {
     YBP.println("ERROR: max clients reached");
-  } else
-    return true;
+    return false;
+  }
+
+  // add new client
+  authenticatedClients.push_back({client->socket(), role});
+  return true;
 }
 
 void AuthController::removeClientFromAuthList(PsychicWebSocketClient* client)
 {
-  byte i;
-  for (i = 0; i < YB_CLIENT_LIMIT; i++) {
-    // did we find an empty slot?
-    if (authenticatedClients[i].socket == client->socket()) {
-      authenticatedClients[i].socket = 0;
-      authenticatedClients[i].role = _cfg.app_default_role;
+  for (auto it = authenticatedClients.begin(); it != authenticatedClients.end(); ++it) {
+    if (it->socket == client->socket()) {
+      authenticatedClients.erase(it);
+      break;
     }
   }
 }

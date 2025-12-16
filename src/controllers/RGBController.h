@@ -16,7 +16,7 @@
 class YarrboardApp;
 class ConfigManager;
 
-class RGBController : BaseController
+class RGBController : public BaseController
 {
   public:
     RGBController(YarrboardApp& app);

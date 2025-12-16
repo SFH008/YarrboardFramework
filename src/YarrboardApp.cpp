@@ -28,6 +28,15 @@ YarrboardApp::YarrboardApp() : config(*this),
                                framerateAvg(10, 10000)
 
 {
+  registerController(rgb);
+  registerController(buzzer);
+  registerController(network);
+  registerController(ntp);
+  registerController(http);
+  registerController(protocol);
+  registerController(auth);
+  registerController(ota);
+  registerController(mqtt);
 }
 
 void YarrboardApp::setup()
@@ -36,30 +45,6 @@ void YarrboardApp::setup()
 
   // get our prefs early on.
   config.setup();
-
-  rgb.setup();
-  YBP.println("RGB ok");
-
-  buzzer.setup();
-  YBP.println("Buzzer ok");
-
-  network.setup();
-  YBP.println("Network ok");
-
-  ntp.setup();
-  YBP.println("NTP ok");
-
-  http.setup();
-  YBP.println("Server ok");
-
-  protocol.setup();
-  YBP.println("Protocol ok");
-
-  auth.setup();
-  YBP.println("Auth ok");
-
-  ota.setup();
-  YBP.println("OTA ok");
 
 #ifdef YB_HAS_BUS_VOLTAGE
   bus_voltage_setup();
@@ -102,14 +87,10 @@ void YarrboardApp::setup()
 
   for (auto* c : _controllers) {
     if (c->setup())
-      YBP.printf("%s OK\n");
+      YBP.printf("✅ %s OK\n", c->getName());
     else
-      YBP.printf("%s FAILED\n");
+      YBP.printf("❌ %s FAILED\n", c->getName());
   }
-
-  // we need to do this last so that all our channels, etc are fully configured.
-  mqtt.setup();
-  YBP.println("MQTT ok");
 
   // we're done with startup log
   YBP.removePrinter(startupLogger);
@@ -124,18 +105,6 @@ void YarrboardApp::loop()
 {
   // start our interval timer
   it.start();
-
-  network.loop();
-  it.time("network_loop");
-
-  rgb.loop();
-  it.time("rgb_loop");
-
-  buzzer.loop();
-  it.time("buzzer_loop");
-
-  ntp.loop();
-  it.time("ntp_loop");
 
 #ifdef YB_HAS_ADC_CHANNELS
   adc_channels_loop();
@@ -177,31 +146,13 @@ void YarrboardApp::loop()
   it.time("brineomatic_loop");
 #endif
 
-  network.loop();
-  it.time("network_loop");
-
-  http.loop();
-  it.time("http_loop");
-
-  protocol.loop();
-  it.time("protocol_loop");
-
-  auth.loop();
-  it.time("auth_loop");
-
-  mqtt.loop();
-  it.time("mqtt_loop");
-
-  ota.loop();
-  it.time("ota_loop");
-
   for (auto* c : _controllers) {
     c->loop();
     it.time(c->getName());
   }
 
   // our debug.
-  // it.print(5000);
+  it.print(5000);
 
   // if (INTERVAL(1000))
   //   DUMP(millis());

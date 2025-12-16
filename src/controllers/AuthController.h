@@ -14,6 +14,7 @@
 #include <Arduino.h>
 #include <PsychicHttp.h>
 #include <WiFi.h>
+#include <etl/vector.h>
 
 class YarrboardApp;
 class ConfigManager;
@@ -34,7 +35,7 @@ class AuthController : public BaseController
   public:
     AuthController(YarrboardApp& app);
 
-    AuthenticatedClient authenticatedClients[YB_CLIENT_LIMIT];
+    etl::vector<AuthenticatedClient, YB_CLIENT_LIMIT> authenticatedClients;
 
     bool setup() override;
 

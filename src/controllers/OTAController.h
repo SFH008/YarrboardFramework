@@ -19,7 +19,7 @@
 class YarrboardApp;
 class ConfigManager;
 
-class OTAController : BaseController
+class OTAController : public BaseController
 {
   public:
     OTAController(YarrboardApp& app);
