@@ -13,8 +13,6 @@
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 
-#include "ntp.h"
-
 YarrboardApp::YarrboardApp() : config(*this),
                                network(*this, config),
                                http(*this, config),
@@ -25,6 +23,7 @@ YarrboardApp::YarrboardApp() : config(*this),
                                ota(*this, config),
                                rgb(*this, config),
                                buzzer(*this, config),
+                               ntp(*this, config),
                                networkLogger(protocol),
                                loopSpeed(100, 1000),
                                framerateAvg(10, 10000)
@@ -48,7 +47,7 @@ void YarrboardApp::setup()
   network.setup();
   YBP.println("Network ok");
 
-  ntp_setup();
+  ntp.setup();
   YBP.println("NTP ok");
 
   http.setup();
@@ -128,6 +127,9 @@ void YarrboardApp::loop()
 
   buzzer.loop();
   it.time("buzzer_loop");
+
+  ntp.loop();
+  it.time("ntp_loop");
 
 #ifdef YB_HAS_ADC_CHANNELS
   adc_channels_loop();

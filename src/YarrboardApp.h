@@ -14,10 +14,12 @@
 #define YarrboardApp_h
 
 #include "AuthController.h"
+#include "BuzzerController.h"
 #include "ConfigManager.h"
 #include "HTTPController.h"
 #include "IntervalTimer.h"
 #include "MQTTController.h"
+#include "NTPController.h"
 #include "NavicoController.h"
 #include "NetworkController.h"
 #include "OTAController.h"
@@ -25,7 +27,6 @@
 #include "RGBController.h"
 #include "RollingAverage.h"
 #include "YarrboardDebug.h"
-#include "BuzzerController.h"
 
 class YarrboardApp
 {
@@ -40,6 +41,7 @@ class YarrboardApp
     OTAController ota;
     RGBController rgb;
     BuzzerController buzzer;
+    NTPController ntp;
 
     YarrboardApp();
 
