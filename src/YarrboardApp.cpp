@@ -22,7 +22,7 @@ YarrboardApp::YarrboardApp() : config(*this),
                                ota(*this, config),
                                rgb(*this, config),
                                buzzer(*this),
-                               ntp(*this, config),
+                               ntp(*this),
                                networkLogger(protocol),
                                loopSpeed(100, 1000),
                                framerateAvg(10, 10000)

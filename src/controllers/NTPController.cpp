@@ -6,27 +6,24 @@
   License: GPLv3
 */
 
-#include "NTPController.h"
+#include "controllers/NTPController.h"
 #include "YarrboardDebug.h"
 
 NTPController* NTPController::_instance = nullptr;
 
-NTPController::NTPController(YarrboardApp& app, ConfigManager& config) : _app(app),
-                                                                         _config(config)
+NTPController::NTPController(YarrboardApp& app) : BaseController(app, "ntp")
 {
 }
 
-void NTPController::setup()
+bool NTPController::setup()
 {
   _instance = this; // Capture the instance for callbacks
 
   // Setup our NTP to get the current time.
   sntp_set_time_sync_notification_cb(_timeAvailableCallbackStatic);
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);
-}
 
-void NTPController::loop()
-{
+  return true;
 }
 
 void NTPController::_timeAvailableCallbackStatic(struct timeval* t)

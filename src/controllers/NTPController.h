@@ -9,6 +9,7 @@
 #ifndef YARR_NTP_H
 #define YARR_NTP_H
 
+#include "controllers/BaseController.h"
 #include "esp_sntp.h"
 #include "time.h"
 #include <Arduino.h>
@@ -16,20 +17,15 @@
 class YarrboardApp;
 class ConfigManager;
 
-class NTPController
+class NTPController : public BaseController
 {
   public:
-    NTPController(YarrboardApp& app, ConfigManager& config);
+    NTPController(YarrboardApp& app);
 
-    void setup();
-    void loop();
-
-    bool isReady();
+    bool setup() override;
+    bool isReady() { return ntp_is_ready; }
 
   private:
-    YarrboardApp& _app;
-    ConfigManager& _config;
-
     const char* ntpServer1 = "pool.ntp.org";
     const char* ntpServer2 = "time.nist.gov";
     const long gmtOffset_sec = 0;
