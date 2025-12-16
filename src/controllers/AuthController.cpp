@@ -6,22 +6,21 @@
   License: GPLv3
 */
 
-#include "AuthController.h"
+#include "controllers/AuthController.h"
 #include "ConfigManager.h"
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 
-AuthController::AuthController(YarrboardApp& app, ConfigManager& config) : _app(app),
-                                                                           _config(config)
+AuthController::AuthController(YarrboardApp& app) : BaseController(app, "auth")
 {
 }
 
-void AuthController::setup()
+bool AuthController::setup()
 {
   // init our authentication stuff
   for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
     authenticatedClients[i].socket = 0;
-    authenticatedClients[i].role = _config.app_default_role;
+    authenticatedClients[i].role = _cfg.app_default_role;
   }
 }
 
@@ -63,11 +62,11 @@ UserRole AuthController::getUserRole(JsonVariantConst input, byte mode, PsychicW
   if (mode == YBP_MODE_WEBSOCKET)
     return getWebsocketRole(input, connection);
   else if (mode == YBP_MODE_HTTP)
-    return _config.api_role;
+    return _cfg.api_role;
   else if (mode == YBP_MODE_SERIAL)
-    return _config.serial_role;
+    return _cfg.serial_role;
   else
-    return _config.app_default_role;
+    return _cfg.app_default_role;
 }
 
 bool AuthController::isWebsocketClientLoggedIn(JsonVariantConst doc, PsychicWebSocketClient* client)
@@ -87,7 +86,7 @@ UserRole AuthController::getWebsocketRole(JsonVariantConst doc, PsychicWebSocket
     if (authenticatedClients[i].socket == client->socket())
       return authenticatedClients[i].role;
 
-  return _config.app_default_role;
+  return _cfg.app_default_role;
 }
 
 bool AuthController::checkLoginCredentials(JsonVariantConst doc, UserRole& role)
@@ -104,18 +103,18 @@ bool AuthController::checkLoginCredentials(JsonVariantConst doc, UserRole& role)
   strlcpy(mypass, doc["pass"] | "", sizeof(myuser));
 
   // morpheus... i'm in.
-  if (!strcmp(_config.admin_user, myuser) && !strcmp(_config.admin_pass, mypass)) {
+  if (!strcmp(_cfg.admin_user, myuser) && !strcmp(_cfg.admin_pass, mypass)) {
     role = ADMIN;
     return true;
   }
 
-  if (!strcmp(_config.guest_user, myuser) && !strcmp(_config.guest_pass, mypass)) {
+  if (!strcmp(_cfg.guest_user, myuser) && !strcmp(_cfg.guest_pass, mypass)) {
     role = GUEST;
     return true;
   }
 
   // default to fail then.
-  role = _config.app_default_role;
+  role = _cfg.app_default_role;
   return false;
 }
 
@@ -124,12 +123,12 @@ bool AuthController::isSerialClientLoggedIn(JsonVariantConst doc)
   if (_app.protocol.isSerialAuthenticated())
     return true;
   else
-    return checkLoginCredentials(doc, _config.serial_role);
+    return checkLoginCredentials(doc, _cfg.serial_role);
 }
 
 bool AuthController::isApiClientLoggedIn(JsonVariantConst doc)
 {
-  return checkLoginCredentials(doc, _config.api_role);
+  return checkLoginCredentials(doc, _cfg.api_role);
 }
 
 bool AuthController::addClientToAuthList(PsychicWebSocketClient* client, UserRole role)
@@ -163,7 +162,7 @@ void AuthController::removeClientFromAuthList(PsychicWebSocketClient* client)
     // did we find an empty slot?
     if (authenticatedClients[i].socket == client->socket()) {
       authenticatedClients[i].socket = 0;
-      authenticatedClients[i].role = _config.app_default_role;
+      authenticatedClients[i].role = _cfg.app_default_role;
     }
   }
 }

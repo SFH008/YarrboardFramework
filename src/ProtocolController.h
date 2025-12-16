@@ -9,8 +9,8 @@
 #ifndef YARR_PROTOCOL_H
 #define YARR_PROTOCOL_H
 
-#include "AuthController.h"
 #include "YarrboardConfig.h"
+#include "controllers/AuthController.h"
 #include "utility.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>

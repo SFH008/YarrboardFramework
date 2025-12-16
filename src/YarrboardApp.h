@@ -13,7 +13,6 @@
 #ifndef YarrboardApp_h
 #define YarrboardApp_h
 
-#include "AuthController.h"
 #include "BuzzerController.h"
 #include "ConfigManager.h"
 #include "HTTPController.h"
@@ -26,6 +25,7 @@
 #include "RGBController.h"
 #include "RollingAverage.h"
 #include "YarrboardDebug.h"
+#include "controllers/AuthController.h"
 #include "controllers/BaseController.h"
 
 #include <cstring>         // For strcmp

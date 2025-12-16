@@ -13,8 +13,8 @@
 #ifndef ConfigManager_h
 #define ConfigManager_h
 
-#include "AuthController.h"
 #include "YarrboardConfig.h"
+#include "controllers/AuthController.h"
 #include "etl/array.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>

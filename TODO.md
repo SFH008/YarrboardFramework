@@ -7,10 +7,7 @@
     * html/css/* -> gets added to the framework css includes
     * html/js/* -> gets added to the framework js includes
 * BaseControllers refactor
-  * setup, loop, end
-  * static _instance
-  * pass in _app, store _config from app as _app.cfg
-  * yba.registerController("name", controller);
+  * refactor the rest of the controllers
 * copy the ChannelRegistry style from JS and port to c++
   * might make more sense to implement it as ChannelController
   * move channel headers/classes to a channels/ folder

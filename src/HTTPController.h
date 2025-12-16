@@ -11,7 +11,7 @@
 
 #include "YarrboardConfig.h"
 
-#include "AuthController.h"
+#include "controllers/AuthController.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <PsychicHttp.h>

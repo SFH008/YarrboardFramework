@@ -10,6 +10,7 @@
 #define YARR_AUTH_H
 
 #include "YarrboardConfig.h"
+#include "controllers/BaseController.h"
 #include <Arduino.h>
 #include <PsychicHttp.h>
 #include <WiFi.h>
@@ -28,15 +29,15 @@ typedef struct {
     UserRole role;
 } AuthenticatedClient;
 
-class AuthController
+class AuthController : BaseController
 {
   public:
-    AuthController(YarrboardApp& app, ConfigManager& config);
+    AuthController(YarrboardApp& app);
 
     AuthenticatedClient authenticatedClients[YB_CLIENT_LIMIT];
 
-    void setup();
-    void loop();
+    virtual bool setup() override;
+    virtual void loop() override;
 
     UserRole getUserRole(JsonVariantConst input, byte mode, PsychicWebSocketClient* connection);
     bool logClientIn(PsychicWebSocketClient* connection, UserRole role);
@@ -45,9 +46,6 @@ class AuthController
     bool isApiClientLoggedIn(JsonVariantConst doc);
 
   private:
-    YarrboardApp& _app;
-    ConfigManager& _config;
-
     bool addClientToAuthList(PsychicWebSocketClient* connection, UserRole role);
     bool isWebsocketClientLoggedIn(JsonVariantConst input, PsychicWebSocketClient* connection);
     bool isSerialClientLoggedIn(JsonVariantConst input);
