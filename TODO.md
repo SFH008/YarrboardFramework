@@ -6,7 +6,8 @@
     * html/logo.png -> overrides framework.html
     * html/css/* -> gets added to the framework css includes
     * html/js/* -> gets added to the framework js includes
-* move scattered auth stuff into an AuthController class
+* convert ntp to controller
+* convert rgb + piezo to controller (or move to app?)
 * BaseControllers refactor
   * setup, loop, end
   * static _instance
@@ -38,3 +39,5 @@
 * figure out how to manage BaseChannel mqtt calls -> really dont want to have to pass config + app details to them.
 * figure out how to properly handle USB_CDC mode to avoid double prints.
 * firmware_manifest_url needs to be configurable and passed to the UI as part of the config.
+* refactor authenticatedClients into an etl container
+* refactor auth to take socket ids and delete the PsychicHttp dependency

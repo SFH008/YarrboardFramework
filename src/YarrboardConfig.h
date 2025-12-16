@@ -134,10 +134,6 @@
 #define YB_VALIDATE_FIRMWARE_SIGNATURE true
 #define YB_BOARD_CONFIG_PATH           "/yarrboard.json"
 
-typedef enum { NOBODY,
-  GUEST,
-  ADMIN } UserRole;
-
 typedef enum { YBP_MODE_WEBSOCKET,
   YBP_MODE_HTTP,
   YBP_MODE_SERIAL } YBMode;

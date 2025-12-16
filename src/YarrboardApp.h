@@ -13,6 +13,7 @@
 #ifndef YarrboardApp_h
 #define YarrboardApp_h
 
+#include "AuthController.h"
 #include "ConfigManager.h"
 #include "HTTPController.h"
 #include "IntervalTimer.h"
@@ -31,6 +32,7 @@ class YarrboardApp
     NetworkController network;
     HTTPController http;
     ProtocolController protocol;
+    AuthController auth;
     NavicoController navico;
     MQTTController mqtt;
     OTAController ota;

@@ -27,6 +27,7 @@ YarrboardApp::YarrboardApp() : config(*this),
                                network(*this, config),
                                http(*this, config),
                                protocol(*this, config),
+                               auth(*this, config),
                                navico(*this, config),
                                mqtt(*this, config),
                                ota(*this, config),
@@ -63,6 +64,9 @@ void YarrboardApp::setup()
 
   protocol.setup();
   YBP.println("Protocol ok");
+
+  auth.setup();
+  YBP.println("Auth ok");
 
   ota.setup();
   YBP.println("OTA ok");
@@ -180,6 +184,9 @@ void YarrboardApp::loop()
 
   protocol.loop();
   it.time("protocol_loop");
+
+  auth.loop();
+  it.time("auth_loop");
 
   mqtt.loop();
   it.time("mqtt_loop");

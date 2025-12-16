@@ -151,7 +151,7 @@ void ProtocolController::handleReceivedJSON(JsonVariantConst input, JsonVariant 
   totalReceivedMessages++;
 
   // what would you say you do around here?
-  UserRole role = _app.http.getUserRole(input, mode, connection);
+  UserRole role = _app.auth.getUserRole(input, mode, connection);
 
   // only pages with no login requirements
   if (!strcmp(cmd, "login"))
@@ -591,7 +591,7 @@ void ProtocolController::handleLogin(JsonVariantConst input, JsonVariant output,
   if (is_authenticated) {
     // check to see if there's room for us.
     if (mode == YBP_MODE_WEBSOCKET) {
-      if (!_app.http.logClientIn(connection, role))
+      if (!_app.auth.logClientIn(connection, role))
         return generateErrorJSON(output, "Too many connections.");
     } else if (mode == YBP_MODE_SERIAL) {
       is_serial_authenticated = true;
@@ -612,15 +612,12 @@ void ProtocolController::handleLogin(JsonVariantConst input, JsonVariant output,
 void ProtocolController::handleLogout(JsonVariantConst input, JsonVariant output, YBMode mode,
   PsychicWebSocketClient* connection)
 {
-  if (!_app.http.isLoggedIn(input, mode, connection))
+  if (!_app.auth.isLoggedIn(input, mode, connection))
     return generateErrorJSON(output, "You are not logged in.");
 
   // what type of client are you?
   if (mode == YBP_MODE_WEBSOCKET) {
-    _app.http.removeClientFromAuthList(connection);
-
-    // we don't actually want to close the connection, bad UI
-    // connection->close();
+    _app.auth.removeClientFromAuthList(connection);
   } else if (mode == YBP_MODE_SERIAL) {
     is_serial_authenticated = false;
     _config.serial_role = _config.app_default_role;

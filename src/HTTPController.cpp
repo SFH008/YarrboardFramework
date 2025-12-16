@@ -4,8 +4,6 @@
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 
-HTTPController* HTTPController::_instance = nullptr;
-
 HTTPController::HTTPController(YarrboardApp& app, ConfigManager& config) : _app(app),
                                                                            _config(config)
 {
@@ -16,12 +14,6 @@ void HTTPController::setup()
   sendMutex = xSemaphoreCreateMutex();
   if (sendMutex == NULL)
     YBP.println("Failed to create send mutex");
-
-  // init our authentication stuff
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
-    authenticatedClients[i].socket = 0;
-    authenticatedClients[i].role = _config.app_default_role;
-  }
 
   // prepare our message queue
   wsRequests = xQueueCreate(YB_RECEIVE_BUFFER_COUNT, sizeof(WebsocketRequest));
@@ -142,7 +134,7 @@ void HTTPController::setup()
   websocketHandler.onClose([this](PsychicWebSocketClient* client) {
     // YBP.printf("[socket] connection #%u closed from %s\n", client->socket(),
     //               client->remoteIP().toString());
-    removeClientFromAuthList(client);
+    _app.auth.removeClientFromAuthList(client);
     websocketClientCount--;
   });
   server->on("/ws", &websocketHandler);
@@ -229,14 +221,14 @@ void HTTPController::sendToAllWebsockets(const char* jsonString, UserRole auth_l
   // make sure we're allowed to see the message
   if (auth_level > _config.app_default_role) {
     for (byte i = 0; i < YB_CLIENT_LIMIT; i++) {
-      if (authenticatedClients[i].socket) {
+      if (_app.auth.authenticatedClients[i].socket) {
         // make sure its a valid client
         PsychicWebSocketClient* client =
-          websocketHandler.getClient(authenticatedClients[i].socket);
+          websocketHandler.getClient(_app.auth.authenticatedClients[i].socket);
         if (client == NULL)
           continue;
 
-        if (authenticatedClients[i].role >= auth_level) {
+        if (_app.auth.authenticatedClients[i].role >= auth_level) {
           if (xSemaphoreTake(sendMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             client->sendMessage(jsonString);
             xSemaphoreGive(sendMutex);
@@ -260,21 +252,6 @@ void HTTPController::sendToAllWebsockets(const char* jsonString, UserRole auth_l
   }
 }
 
-bool HTTPController::logClientIn(PsychicWebSocketClient* client, UserRole role)
-{
-  // did we not find a spot?
-  if (!addClientToAuthList(client, role)) {
-    YBP.println("Error: could not add to auth list.");
-
-    // i'm pretty sure this closes our connection
-    close(client->socket());
-
-    return false;
-  }
-
-  return true;
-}
-
 esp_err_t HTTPController::handleWebServerRequest(JsonVariant input, PsychicRequest* request, PsychicResponse* response)
 {
   esp_err_t err = ESP_OK;
@@ -286,7 +263,7 @@ esp_err_t HTTPController::handleWebServerRequest(JsonVariant input, PsychicReque
     input["pass"] = request->getParam("pass")->value();
 
   if (_config.app_enable_api) {
-    isApiClientLoggedIn(input);
+    _app.auth.isApiClientLoggedIn(input);
     _app.protocol.handleReceivedJSON(input, output, YBP_MODE_HTTP);
   } else
     _app.protocol.generateErrorJSON(output, "Web API is disabled.");
@@ -398,134 +375,6 @@ void HTTPController::handleWebsocketMessageLoop(WebsocketRequest* request)
       free(jsonBuffer);
     } else {
       YBP.println("Error allocating in handleWebsocketMessageLoop()");
-    }
-  }
-}
-
-bool HTTPController::isLoggedIn(JsonVariantConst input, byte mode,
-  PsychicWebSocketClient* connection)
-{
-  // login only required for websockets.
-  if (mode == YBP_MODE_WEBSOCKET)
-    return isWebsocketClientLoggedIn(input, connection);
-  else if (mode == YBP_MODE_HTTP)
-    return isApiClientLoggedIn(input);
-  else if (mode == YBP_MODE_SERIAL)
-    return isSerialClientLoggedIn(input);
-  else
-    return false;
-}
-
-UserRole HTTPController::getUserRole(JsonVariantConst input, byte mode,
-  PsychicWebSocketClient* connection)
-{
-  // login only required for websockets.
-  if (mode == YBP_MODE_WEBSOCKET)
-    return getWebsocketRole(input, connection);
-  else if (mode == YBP_MODE_HTTP)
-    return _config.api_role;
-  else if (mode == YBP_MODE_SERIAL)
-    return _config.serial_role;
-  else
-    return _config.app_default_role;
-}
-
-bool HTTPController::isWebsocketClientLoggedIn(JsonVariantConst doc,
-  PsychicWebSocketClient* client)
-{
-  // are they in our auth array?
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++)
-    if (authenticatedClients[i].socket == client->socket())
-      return true;
-
-  return false;
-}
-
-UserRole HTTPController::getWebsocketRole(JsonVariantConst doc,
-  PsychicWebSocketClient* client)
-{
-  // are they in our auth array?
-  for (byte i = 0; i < YB_CLIENT_LIMIT; i++)
-    if (authenticatedClients[i].socket == client->socket())
-      return authenticatedClients[i].role;
-
-  return _config.app_default_role;
-}
-
-bool HTTPController::checkLoginCredentials(JsonVariantConst doc, UserRole& role)
-{
-  if (!doc["user"].is<String>())
-    return false;
-  if (!doc["pass"].is<String>())
-    return false;
-
-  // init
-  char myuser[YB_USERNAME_LENGTH];
-  char mypass[YB_PASSWORD_LENGTH];
-  strlcpy(myuser, doc["user"] | "", sizeof(myuser));
-  strlcpy(mypass, doc["pass"] | "", sizeof(myuser));
-
-  // morpheus... i'm in.
-  if (!strcmp(_config.admin_user, myuser) && !strcmp(_config.admin_pass, mypass)) {
-    role = ADMIN;
-    return true;
-  }
-
-  if (!strcmp(_config.guest_user, myuser) && !strcmp(_config.guest_pass, mypass)) {
-    role = GUEST;
-    return true;
-  }
-
-  // default to fail then.
-  role = _config.app_default_role;
-  return false;
-}
-
-bool HTTPController::isSerialClientLoggedIn(JsonVariantConst doc)
-{
-  if (_app.protocol.isSerialAuthenticated())
-    return true;
-  else
-    return checkLoginCredentials(doc, _config.serial_role);
-}
-
-bool HTTPController::isApiClientLoggedIn(JsonVariantConst doc)
-{
-  return checkLoginCredentials(doc, _config.api_role);
-}
-
-bool HTTPController::addClientToAuthList(PsychicWebSocketClient* client, UserRole role)
-{
-  byte i;
-  for (i = 0; i < YB_CLIENT_LIMIT; i++) {
-    // did we find an empty slot?
-    if (!authenticatedClients[i].socket) {
-      authenticatedClients[i].socket = client->socket();
-      authenticatedClients[i].role = role;
-      break;
-    }
-
-    // are we already authenticated?
-    if (authenticatedClients[i].socket == client->socket())
-      break;
-  }
-
-  // did we not find a spot?
-  if (i == YB_CLIENT_LIMIT) {
-    return false;
-    YBP.println("ERROR: max clients reached");
-  } else
-    return true;
-}
-
-void HTTPController::removeClientFromAuthList(PsychicWebSocketClient* client)
-{
-  byte i;
-  for (i = 0; i < YB_CLIENT_LIMIT; i++) {
-    // did we find an empty slot?
-    if (authenticatedClients[i].socket == client->socket()) {
-      authenticatedClients[i].socket = 0;
-      authenticatedClients[i].role = _config.app_default_role;
     }
   }
 }
