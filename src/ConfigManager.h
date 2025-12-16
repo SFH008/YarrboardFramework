@@ -63,6 +63,8 @@ class ConfigManager
     String server_cert;
     String server_key;
 
+    String firmware_manifest_url = "https://raw.githubusercontent.com/hoeken/yarrboard-firmware/main/firmware.json";
+
     ConfigManager(YarrboardApp& app);
 
     // Lifecycle

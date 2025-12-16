@@ -29,7 +29,7 @@ bool OTAController::setup()
     ArduinoOTA.begin();
   }
 
-  FOTA.setManifestURL("https://raw.githubusercontent.com/hoeken/yarrboard-firmware/main/firmware.json");
+  FOTA.setManifestURL(_cfg.firmware_manifest_url);
   FOTA.setPubKey(MyPubKey);
   FOTA.useBundledCerts();
 

@@ -1,7 +1,8 @@
 ## v1.0.0 Release
 
-* fix or disable our CI hooks
+* fix our CI hooks
 * start the conversion of firmware with Sendit as the first target
+  * figure out how to properly handle USB_CDC mode to avoid double prints.
 
 * modify the gulp.js script to pull from the framework lib directory
 * project specific gulp rules to pull in custom stuff logo, css, js, etc.
@@ -9,9 +10,6 @@
     * html/logo.png -> overrides framework.html
     * html/css/* -> gets added to the framework css includes
     * html/js/* -> gets added to the framework js includes
-
-* figure out how to properly handle USB_CDC mode to avoid double prints.
-* firmware_manifest_url needs to be configurable and passed to the UI as part of the config.
 
 * protocol hooks
   * move the controller specific commands to each controllers setup.

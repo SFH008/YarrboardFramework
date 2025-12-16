@@ -1539,6 +1539,8 @@ void ProtocolController::generateConfigJSON(JsonVariant output)
   output["brightness"] = _cfg.globalBrightness;
   output["git_hash"] = GIT_HASH;
   output["build_time"] = BUILD_TIME;
+  output["firmware_manifest_url"] = _cfg.firmware_manifest_url;
+
   _app.buzzer.generateMelodyJSON(output);
   _cfg.generateBoardConfig(output);
 
