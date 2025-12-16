@@ -52,11 +52,8 @@ void YarrboardApp::setup()
   piezo_setup();
 #endif
 
-  // we need network to function!
-  if (network.setup())
-    YBP.println("Network ok");
-  else
-    return;
+  network.setup();
+  YBP.println("Network ok");
 
   ntp_setup();
   YBP.println("NTP ok");
@@ -124,13 +121,11 @@ void YarrboardApp::setup()
 
 void YarrboardApp::loop()
 {
-  if (config.is_first_boot) {
-    network.loopImprov();
-    return;
-  }
-
   // start our interval timer
   it.start();
+
+  network.loop();
+  it.time("network_loop");
 
 #ifdef YB_HAS_STATUS_RGB
   rgb_loop();

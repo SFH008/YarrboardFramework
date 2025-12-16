@@ -24,11 +24,10 @@ class NetworkController
   public:
     NetworkController(YarrboardApp& app, ConfigManager& config);
 
-    bool setup();
+    void setup();
     void loop();
 
     void setupImprov();
-    void loopImprov();
 
     void setupWifi();
     bool connectToWifi(const char* ssid, const char* pass);

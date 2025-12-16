@@ -21,7 +21,7 @@ NetworkController::NetworkController(YarrboardApp& app, ConfigManager& config) :
 {
 }
 
-bool NetworkController::setup()
+void NetworkController::setup()
 {
 
   _instance = this; // Capture the instance for callbacks
@@ -33,8 +33,6 @@ bool NetworkController::setup()
     setupImprov();
   else
     setupWifi();
-
-  return !_config.is_first_boot;
 }
 
 void NetworkController::loop()
@@ -164,7 +162,7 @@ void NetworkController::setupImprov()
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
 
-  // Identify this device
+  // Serial Configuration
   improvSerial.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32,
     _config.board_name,
     YB_FIRMWARE_VERSION,
@@ -172,10 +170,10 @@ void NetworkController::setupImprov()
     device_url.c_str());
 
   improvSerial.onImprovError(_onImprovErrorStatic);
-  improvSerial.onImprovConnected(_onImprovConnectedStatic);
+  improvSerial.setCustomConnectWiFi(_onImprovCustomConnectWiFiStatic);
   improvSerial.setCustomConnectWiFi(_onImprovCustomConnectWiFiStatic);
 
-  // Identify this device
+  // Bluetooth Configuration
   improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32,
     _config.board_name,
     YB_FIRMWARE_VERSION,
@@ -183,13 +181,12 @@ void NetworkController::setupImprov()
     device_url.c_str());
 
   improvBLE.onImprovError(_onImprovErrorStatic);
-  improvBLE.onImprovConnected(_onImprovConnectedStatic);
   improvBLE.setCustomConnectWiFi(_onImprovCustomConnectWiFiStatic);
-}
+  improvBLE.onImprovConnected(_onImprovConnectedStatic);
 
-void NetworkController::loopImprov()
-{
-  improvSerial.handleSerial();
+  // wait for improv to complete
+  while (_config.is_first_boot)
+    improvSerial.handleSerial();
 }
 
 // ==========================================================
@@ -237,7 +234,5 @@ void NetworkController::_handleImprovConnected(const char* ssid, const char* pas
 
   char error[128];
   _config.saveConfig(error, sizeof(error));
-
-  // a bit hacky until I can figure out how to call app.setup from here.
-  ESP.restart();
+  _config.is_first_boot = false;
 }
