@@ -16,12 +16,3 @@ BaseController::BaseController(YarrboardApp& app, const char* name) : _app(app),
                                                                       _name(name)
 {
 }
-
-bool BaseController::setup()
-{
-  return true;
-}
-
-void BaseController::loop()
-{
-}

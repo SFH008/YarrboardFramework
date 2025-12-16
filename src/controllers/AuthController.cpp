@@ -24,10 +24,6 @@ bool AuthController::setup()
   }
 }
 
-void AuthController::loop()
-{
-}
-
 bool AuthController::logClientIn(PsychicWebSocketClient* client, UserRole role)
 {
   // did we not find a spot?

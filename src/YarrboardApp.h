@@ -13,7 +13,6 @@
 #ifndef YarrboardApp_h
 #define YarrboardApp_h
 
-#include "BuzzerController.h"
 #include "ConfigManager.h"
 #include "HTTPController.h"
 #include "IntervalTimer.h"
@@ -27,6 +26,7 @@
 #include "YarrboardDebug.h"
 #include "controllers/AuthController.h"
 #include "controllers/BaseController.h"
+#include "controllers/BuzzerController.h"
 
 #include <cstring>         // For strcmp
 #include <etl/algorithm.h> // For finding/removing

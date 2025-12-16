@@ -20,8 +20,8 @@ class BaseController
   public:
     BaseController(YarrboardApp& app, const char* name);
 
-    virtual bool setup();
-    virtual void loop();
+    virtual bool setup() { return true; }
+    virtual void loop() {}
 
     const char* getName() { return _name; }
 

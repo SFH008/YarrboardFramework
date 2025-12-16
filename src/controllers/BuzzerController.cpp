@@ -6,15 +6,14 @@
   License: GPLv3
 */
 
-#include "BuzzerController.h"
+#include "controllers/BuzzerController.h"
 #include "YarrboardDebug.h"
 
-BuzzerController::BuzzerController(YarrboardApp& app, ConfigManager& config) : _app(app),
-                                                                               _config(config)
+BuzzerController::BuzzerController(YarrboardApp& app) : BaseController(app, "buzzer")
 {
 }
 
-void BuzzerController::setup()
+bool BuzzerController::setup()
 {
 #ifdef YB_HAS_PIEZO
   pinMode(YB_PIEZO_PIN, OUTPUT);
@@ -23,7 +22,7 @@ void BuzzerController::setup()
     // LEDC once
     if (!ledcAttach(YB_PIEZO_PIN, 1000, LEDC_RES_BITS)) {
       YBP.println("Error attaching piezo to LEDC channel.");
-      return;
+      return false;
     } else {
       piezoIsActive = false;
     }
@@ -44,10 +43,7 @@ void BuzzerController::setup()
 
   playMelodyByName(startup_melody);
 #endif
-}
-
-void BuzzerController::loop()
-{
+  return true;
 }
 
 void BuzzerController::generateMelodyJSON(JsonVariant output)

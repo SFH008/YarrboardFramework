@@ -7,11 +7,11 @@
 */
 
 #include "ProtocolController.h"
-#include "BuzzerController.h"
 #include "ConfigManager.h"
 #include "MQTTController.h"
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
+#include "controllers/BuzzerController.h"
 #include "utility.h"
 
 #ifdef YB_HAS_ADC_CHANNELS

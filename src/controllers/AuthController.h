@@ -29,15 +29,14 @@ typedef struct {
     UserRole role;
 } AuthenticatedClient;
 
-class AuthController : BaseController
+class AuthController : public BaseController
 {
   public:
     AuthController(YarrboardApp& app);
 
     AuthenticatedClient authenticatedClients[YB_CLIENT_LIMIT];
 
-    virtual bool setup() override;
-    virtual void loop() override;
+    bool setup() override;
 
     UserRole getUserRole(JsonVariantConst input, byte mode, PsychicWebSocketClient* connection);
     bool logClientIn(PsychicWebSocketClient* connection, UserRole role);

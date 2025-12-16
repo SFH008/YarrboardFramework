@@ -10,6 +10,7 @@
 #define YARR_BUZZER_H
 
 #include "YarrboardConfig.h"
+#include "controllers/BaseController.h"
 #include "driver/ledc.h"
 #include <ArduinoJson.h>
 
@@ -34,21 +35,17 @@ class ConfigManager;
 
 void BuzzerTask(void* /*pv*/);
 
-class BuzzerController
+class BuzzerController : public BaseController
 {
   public:
-    BuzzerController(YarrboardApp& app, ConfigManager& config);
+    BuzzerController(YarrboardApp& app);
 
-    void setup();
-    void loop();
+    bool setup() override;
 
     bool playMelodyByName(const char* melody);
     void generateMelodyJSON(JsonVariant output);
 
   private:
-    YarrboardApp& _app;
-    ConfigManager& _config;
-
 #ifdef YB_HAS_PIEZO
     // our global note buffer
     static Note g_noteBuffer[YB_MAX_MELODY_LENGTH]; // pick a safe max size
