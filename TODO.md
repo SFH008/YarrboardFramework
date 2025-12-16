@@ -2,7 +2,6 @@
 
 * fix our CI hooks
 * start the conversion of firmware with Sendit as the first target
-  * figure out how to properly handle USB_CDC mode to avoid double prints.
 
 * modify the gulp.js script to pull from the framework lib directory
 * project specific gulp rules to pull in custom stuff logo, css, js, etc.
@@ -19,6 +18,9 @@
   * onMessage() - gets called for every single message
     * return true = continue
     * return false = stop
+
+* figure out how to manage BaseChannel mqtt calls -> really dont want to have to pass config + app details to them.
+  * probably have the ChannelController handle it
 
 * investigate how to implement ChannelControllers in a way that is extensible
 * copy the ChannelRegistry style from JS and port to c++
@@ -38,5 +40,3 @@
         * yba.registerChannels(channels);
         * yba.registerMQTTChannels(channels);
         * yba.registerHAChannels(channels);
-
-* figure out how to manage BaseChannel mqtt calls -> really dont want to have to pass config + app details to them.

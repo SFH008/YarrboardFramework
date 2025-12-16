@@ -52,12 +52,12 @@ void debug_setup()
   YBP.addPrinter(Serial);
 
   // native usb serial too
-  // #ifdef YB_USB_SERIAL
-  //   // usb serial takes over the Serial object, but we want to print on both.
-  //   // Serial0 is the regular uart output
-  //   Serial0.begin(115200);
-  //   YBP.addPrinter(Serial0);
-  // #endif
+  if (ARDUINO_USB_CDC_ON_BOOT) {
+    // usb serial takes over the Serial object, but we want to print on both.
+    // Serial0 is the regular uart output
+    Serial0.begin(115200);
+    YBP.addPrinter(Serial0);
+  }
 
   // startup log logs to a string for getting later
   YBP.addPrinter(startupLogger);
