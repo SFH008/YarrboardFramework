@@ -21,7 +21,6 @@ YarrboardApp::YarrboardApp() : config(*this),
                                mqtt(*this),
                                ota(*this),
                                rgb(*this),
-                               buzzer(*this),
                                ntp(*this),
                                networkLogger(protocol),
                                loopSpeed(100, 1000),
@@ -29,7 +28,6 @@ YarrboardApp::YarrboardApp() : config(*this),
 
 {
   registerController(rgb);
-  registerController(buzzer);
   registerController(network);
   registerController(ntp);
   registerController(http);

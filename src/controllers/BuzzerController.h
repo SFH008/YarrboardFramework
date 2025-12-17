@@ -42,6 +42,7 @@ class BuzzerController : public BaseController
     BuzzerController(YarrboardApp& app);
 
     bool setup() override;
+    void generateConfigHook(JsonVariant output) override;
 
     bool playMelodyByName(const char* melody);
     void generateMelodyJSON(JsonVariant output);
@@ -49,27 +50,10 @@ class BuzzerController : public BaseController
     // Make the task a friend so it can access private static members
     friend void BuzzerTask(void* pv);
 
+    byte buzzerPin = 0;
+    bool isActive = false;
+
   private:
-    // --- DECLARATIONS ONLY (No assignments here) ---
-
-    // our global note buffer
-    static Note g_noteBuffer[YB_MAX_MELODY_LENGTH];
-    static size_t g_noteCount;
-
-    // Buzzer task control
-    static TaskHandle_t buzzerTaskHandle;
-    static const Note* g_seq;
-    static size_t g_len;
-    static portMUX_TYPE g_mux;
-
-#ifdef YB_PIEZO_ACTIVE
-    bool piezoIsActive = true;
-#elif defined(YB_PIEZO_PASSIVE)
-    bool piezoIsActive = false;
-#else
-    bool piezoIsActive = false;
-#endif
-
     void playMelody(const Note* seq, size_t len);
     void buzzerMute();
     void buzzerTone(uint16_t freqHz);

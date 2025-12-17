@@ -19,7 +19,6 @@
 #include "YarrboardDebug.h"
 #include "controllers/AuthController.h"
 #include "controllers/BaseController.h"
-#include "controllers/BuzzerController.h"
 #include "controllers/HTTPController.h"
 #include "controllers/MQTTController.h"
 #include "controllers/NTPController.h"
@@ -43,7 +42,6 @@ class YarrboardApp
     MQTTController mqtt;
     OTAController ota;
     RGBController rgb;
-    BuzzerController buzzer;
     NTPController ntp;
 
     const char* board_name = "Yarrboard";

@@ -1397,7 +1397,6 @@ void ProtocolController::generateConfigJSON(JsonVariant output)
   output["build_time"] = BUILD_TIME;
   output["firmware_manifest_url"] = _app.ota.firmware_manifest_url;
 
-  _app.buzzer.generateMelodyJSON(output);
   _cfg.generateBoardConfig(output);
 
   output["is_development"] = YB_IS_DEVELOPMENT;
