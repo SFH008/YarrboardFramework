@@ -14,87 +14,62 @@
 #include "controllers/MQTTController.h"
 #include "utility.h"
 
-#ifdef YB_HAS_ADC_CHANNELS
-  #include "adc_channel.h"
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  #include "digital_input_channel.h"
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-  #include "pwm_channel.h"
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  #include "relay_channel.h"
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  #include "servo_channel.h"
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  #include "stepper_channel.h"
-#endif
-
 ProtocolController::ProtocolController(YarrboardApp& app) : BaseController(app, "protocol")
 {
 }
 
 bool ProtocolController::setup()
 {
-  registerCommand(NOBODY, "ping", &ProtocolController::handlePing);
+  registerCommand(NOBODY, "ping", this, &ProtocolController::handlePing);
 
-  registerCommand(GUEST, "get_config", &ProtocolController::handleGetConfig);
-  registerCommand(GUEST, "get_stats", &ProtocolController::handleGetStats);
-  registerCommand(GUEST, "get_update", &ProtocolController::handleGetUpdate);
-  registerCommand(GUEST, "set_theme", &ProtocolController::handleSetTheme);
-  registerCommand(GUEST, "set_brightness", &ProtocolController::handleSetBrightness);
+  registerCommand(GUEST, "get_config", this, &ProtocolController::handleGetConfig);
+  registerCommand(GUEST, "get_stats", this, &ProtocolController::handleGetStats);
+  registerCommand(GUEST, "get_update", this, &ProtocolController::handleGetUpdate);
+  registerCommand(GUEST, "set_theme", this, &ProtocolController::handleSetTheme);
+  registerCommand(GUEST, "set_brightness", this, &ProtocolController::handleSetBrightness);
 
-  registerCommand(GUEST, "play_sound", &ProtocolController::handlePlaySound);
+  registerCommand(GUEST, "play_sound", this, &ProtocolController::handlePlaySound);
 
-  registerCommand(GUEST, "set_pwm_channel", &ProtocolController::handleSetPWMChannel);
-  registerCommand(GUEST, "toggle_pwm_channel", &ProtocolController::handleTogglePWMChannel);
-  registerCommand(GUEST, "set_relay_channel", &ProtocolController::handleSetRelayChannel);
-  registerCommand(GUEST, "toggle_relay_channel", &ProtocolController::handleToggleRelayChannel);
-  registerCommand(GUEST, "set_servo_channel", &ProtocolController::handleSetServoChannel);
-  registerCommand(GUEST, "set_stepper_channel", &ProtocolController::handleSetStepperChannel);
+  registerCommand(GUEST, "set_pwm_channel", this, &ProtocolController::handleSetPWMChannel);
+  registerCommand(GUEST, "toggle_pwm_channel", this, &ProtocolController::handleTogglePWMChannel);
+  registerCommand(GUEST, "set_relay_channel", this, &ProtocolController::handleSetRelayChannel);
+  registerCommand(GUEST, "toggle_relay_channel", this, &ProtocolController::handleToggleRelayChannel);
+  registerCommand(GUEST, "set_servo_channel", this, &ProtocolController::handleSetServoChannel);
+  registerCommand(GUEST, "set_stepper_channel", this, &ProtocolController::handleSetStepperChannel);
 
 #ifdef YB_IS_BRINEOMATIC
-  registerCommand(GUEST, "start_watermaker", &ProtocolController::handleStartWatermaker);
-  registerCommand(GUEST, "flush_watermaker", &ProtocolController::handleFlushWatermaker);
-  registerCommand(GUEST, "pickle_watermaker", &ProtocolController::handlePickleWatermaker);
-  registerCommand(GUEST, "depickle_watermaker", &ProtocolController::handleDepickleWatermaker);
-  registerCommand(GUEST, "stop_watermaker", &ProtocolController::handleStopWatermaker);
-  registerCommand(GUEST, "idle_watermaker", &ProtocolController::handleIdleWatermaker);
-  registerCommand(GUEST, "manual_watermaker", &ProtocolController::handleManualWatermaker);
-  registerCommand(GUEST, "set_watermaker", &ProtocolController::handleSetWatermaker);
-  registerCommand(GUEST, "brineomatic_save_general_config", &ProtocolController::handleBrineomaticSaveGeneralConfig);
-  registerCommand(GUEST, "brineomatic_save_hardware_config", &ProtocolController::handleBrineomaticSaveHardwareConfig);
-  registerCommand(GUEST, "brineomatic_save_safeguards_config", &ProtocolController::handleBrineomaticSaveSafeguardsConfig);
+  registerCommand(GUEST, "start_watermaker", this, &ProtocolController::handleStartWatermaker);
+  registerCommand(GUEST, "flush_watermaker", this, &ProtocolController::handleFlushWatermaker);
+  registerCommand(GUEST, "pickle_watermaker", this, &ProtocolController::handlePickleWatermaker);
+  registerCommand(GUEST, "depickle_watermaker", this, &ProtocolController::handleDepickleWatermaker);
+  registerCommand(GUEST, "stop_watermaker", this, &ProtocolController::handleStopWatermaker);
+  registerCommand(GUEST, "idle_watermaker", this, &ProtocolController::handleIdleWatermaker);
+  registerCommand(GUEST, "manual_watermaker", this, &ProtocolController::handleManualWatermaker);
+  registerCommand(GUEST, "set_watermaker", this, &ProtocolController::handleSetWatermaker);
+  registerCommand(GUEST, "brineomatic_save_general_config", this, &ProtocolController::handleBrineomaticSaveGeneralConfig);
+  registerCommand(GUEST, "brineomatic_save_hardware_config", this, &ProtocolController::handleBrineomaticSaveHardwareConfig);
+  registerCommand(GUEST, "brineomatic_save_safeguards_config", this, &ProtocolController::handleBrineomaticSaveSafeguardsConfig);
 #endif
 
-  registerCommand(ADMIN, "set_general_config", &ProtocolController::handleSetGeneralConfig);
-  registerCommand(ADMIN, "save_config", &ProtocolController::handleSaveConfig);
-  registerCommand(ADMIN, "get_full_config", &ProtocolController::handleGetFullConfig);
-  registerCommand(ADMIN, "get_network_config", &ProtocolController::handleGetNetworkConfig);
-  registerCommand(ADMIN, "get_app_config", &ProtocolController::handleGetAppConfig);
-  registerCommand(ADMIN, "set_network_config", &ProtocolController::handleSetNetworkConfig);
-  registerCommand(ADMIN, "set_authentication_config", &ProtocolController::handleSetAuthenticationConfig);
-  registerCommand(ADMIN, "set_webserver_config", &ProtocolController::handleSetWebServerConfig);
-  registerCommand(ADMIN, "set_mqtt_config", &ProtocolController::handleSetMQTTConfig);
-  registerCommand(ADMIN, "set_misc_config", &ProtocolController::handleSetMiscellaneousConfig);
-  registerCommand(ADMIN, "restart", &ProtocolController::handleRestart);
-  registerCommand(ADMIN, "crashme", &ProtocolController::handleCrashMe);
-  registerCommand(ADMIN, "factory_reset", &ProtocolController::handleFactoryReset);
-  registerCommand(ADMIN, "ota_start", &ProtocolController::handleOTAStart);
+  registerCommand(ADMIN, "set_general_config", this, &ProtocolController::handleSetGeneralConfig);
+  registerCommand(ADMIN, "save_config", this, &ProtocolController::handleSaveConfig);
+  registerCommand(ADMIN, "get_full_config", this, &ProtocolController::handleGetFullConfig);
+  registerCommand(ADMIN, "get_network_config", this, &ProtocolController::handleGetNetworkConfig);
+  registerCommand(ADMIN, "get_app_config", this, &ProtocolController::handleGetAppConfig);
+  registerCommand(ADMIN, "set_network_config", this, &ProtocolController::handleSetNetworkConfig);
+  registerCommand(ADMIN, "set_authentication_config", this, &ProtocolController::handleSetAuthenticationConfig);
+  registerCommand(ADMIN, "set_webserver_config", this, &ProtocolController::handleSetWebServerConfig);
+  registerCommand(ADMIN, "set_mqtt_config", this, &ProtocolController::handleSetMQTTConfig);
+  registerCommand(ADMIN, "set_misc_config", this, &ProtocolController::handleSetMiscellaneousConfig);
+  registerCommand(ADMIN, "restart", this, &ProtocolController::handleRestart);
+  registerCommand(ADMIN, "crashme", this, &ProtocolController::handleCrashMe);
+  registerCommand(ADMIN, "factory_reset", this, &ProtocolController::handleFactoryReset);
+  registerCommand(ADMIN, "ota_start", this, &ProtocolController::handleOTAStart);
 
-  registerCommand(ADMIN, "config_pwm_channel", &ProtocolController::handleConfigPWMChannel);
-  registerCommand(ADMIN, "config_relay_channel", &ProtocolController::handleConfigRelayChannel);
-  registerCommand(ADMIN, "config_servo_channel", &ProtocolController::handleConfigServoChannel);
-  registerCommand(ADMIN, "config_stepper_channel", &ProtocolController::handleConfigStepperChannel);
-  registerCommand(ADMIN, "config_adc", &ProtocolController::handleConfigADC);
+  registerCommand(ADMIN, "config_pwm_channel", this, &ProtocolController::handleConfigPWMChannel);
+  registerCommand(ADMIN, "config_relay_channel", this, &ProtocolController::handleConfigRelayChannel);
+  registerCommand(ADMIN, "config_servo_channel", this, &ProtocolController::handleConfigServoChannel);
+  registerCommand(ADMIN, "config_stepper_channel", this, &ProtocolController::handleConfigStepperChannel);
 
   // send serial a config off the bat
   if (_cfg.app_enable_serial) {
@@ -1103,126 +1078,6 @@ void ProtocolController::handleSetStepperChannel(JsonVariantConst input, JsonVar
 #endif
 }
 
-void ProtocolController::handleConfigADC(JsonVariantConst input, JsonVariant output)
-{
-#ifdef YB_HAS_ADC_CHANNELS
-  char error[128] = "Unknown";
-
-  // load our channel
-  auto* ch = lookupChannel(input, output, adc_channels);
-  if (!ch)
-    return;
-
-  // channel name
-  if (input["name"].is<String>()) {
-    // is it too long?
-    if (strlen(input["name"]) > YB_CHANNEL_NAME_LENGTH - 1) {
-      sprintf(error, "Maximum channel name length is %s characters.", YB_CHANNEL_NAME_LENGTH - 1);
-      return generateErrorJSON(output, error);
-    }
-
-    // save to our storage
-    strlcpy(ch->name, input["name"] | "ADC ?", sizeof(ch->name));
-  }
-
-  // enabled
-  if (input["enabled"].is<bool>()) {
-    // save right nwo.
-    bool enabled = input["enabled"];
-    ch->isEnabled = enabled;
-  }
-
-  // channel type
-  if (input["type"].is<String>()) {
-    // is it too long?
-    if (strlen(input["type"]) > YB_TYPE_LENGTH - 1) {
-      sprintf(error, "Maximum channel type length is %s characters.", YB_CHANNEL_NAME_LENGTH - 1);
-      return generateErrorJSON(output, error);
-    }
-
-    // save to our storage
-    strlcpy(ch->type, input["type"] | "other", sizeof(ch->type));
-  }
-
-  // channel type
-  if (input["display_decimals"].is<int>()) {
-    int8_t display_decimals = input["display_decimals"];
-
-    if (display_decimals < 0 || display_decimals > 4)
-      return generateErrorJSON(output, "Must be between 0 and 4");
-
-    // change our channel.
-    ch->displayDecimals = display_decimals;
-  }
-
-  // useCalibrationTable
-  if (input["useCalibrationTable"].is<bool>()) {
-    // save right nwo.
-    bool enabled = input["useCalibrationTable"];
-    ch->useCalibrationTable = enabled;
-  }
-
-  // are we using a calibration table?
-  if (ch->useCalibrationTable) {
-    // calibratedUnits
-    if (input["calibratedUnits"].is<String>()) {
-      // is it too long?
-      if (strlen(input["calibratedUnits"]) > YB_ADC_UNIT_LENGTH - 1) {
-        sprintf(error, "Maximum calibrated units length is %s characters.", YB_ADC_UNIT_LENGTH - 1);
-        return generateErrorJSON(output, error);
-      }
-
-      // save to our storage
-      strlcpy(ch->calibratedUnits, input["calibratedUnits"] | "", sizeof(ch->calibratedUnits));
-    }
-
-    // calibratedUnits
-    if (input["add_calibration"].is<JsonArrayConst>()) {
-      JsonArrayConst pair = input["add_calibration"].as<JsonArrayConst>();
-      if (pair.size() != 2)
-        return generateErrorJSON(output, "Each calibration entry must have exactly 2 elements [v, y]");
-
-      float v = pair[0].as<float>();
-      float y = pair[1].as<float>();
-
-      // add it in
-      if (!ch->addCalibrationValue({v, y}))
-        return generateErrorJSON(output, "Failed to add calibration entry");
-    }
-
-    // calibratedUnits
-    if (input["remove_calibration"].is<JsonArrayConst>()) {
-      JsonArrayConst pair = input["remove_calibration"].as<JsonArrayConst>();
-      if (pair.size() != 2)
-        return generateErrorJSON(output, "Each calibration entry must have exactly 2 elements [v, y]");
-
-      float v = pair[0].as<float>();
-      float y = pair[1].as<float>();
-
-      // Use std::isfinite(v) if <cmath> is available; otherwise isfinite(v) with <math.h>
-      if (!std::isfinite(v) || !std::isfinite(y))
-        return generateErrorJSON(output, "Non-finite number in table");
-
-      // remove any matching elements
-      for (auto it = ch->calibrationTable.begin(); it != ch->calibrationTable.end();) {
-        if (it->voltage == v && it->calibrated == y) {
-          // erase returns the next valid iterator
-          it = ch->calibrationTable.erase(it);
-        } else {
-          ++it;
-        }
-      }
-    }
-  }
-
-  // write it to file
-  if (!saveConfig(error, sizeof(error)))
-    return generateErrorJSON(output, error);
-#else
-  return generateErrorJSON(output, "Board does not have ADC channels.");
-#endif
-}
-
 void ProtocolController::handleSetTheme(JsonVariantConst input, JsonVariant output)
 {
   if (!input["theme"].is<String>())
@@ -1566,62 +1421,57 @@ void ProtocolController::generateUpdateJSON(JsonVariant output)
   output["msg"] = "update";
   output["uptime"] = esp_timer_get_time();
 
-#ifdef YB_HAS_BUS_VOLTAGE
-  output["bus_voltage"] = getBusVoltage();
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-  JsonArray channels = output["pwm"].to<JsonArray>();
-  for (auto& ch : pwm_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateUpdate(jo);
+  for (auto& c : _app.getControllers()) {
+    c->generateUpdateHook(output);
   }
-#endif
 
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  JsonArray channels = output["dio"].to<JsonArray>();
-  for (auto& ch : digital_input_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateUpdate(jo);
-  }
-#endif
+  // #ifdef YB_HAS_BUS_VOLTAGE
+  //   output["bus_voltage"] = getBusVoltage();
+  // #endif
 
-#ifdef YB_HAS_RELAY_CHANNELS
-  JsonArray r_channels = output["relay"].to<JsonArray>();
-  for (auto& ch : relay_channels) {
-    JsonObject jo = r_channels.add<JsonObject>();
-    ch.generateUpdate(jo);
-  }
-#endif
+  // #ifdef YB_HAS_PWM_CHANNELS
+  //   JsonArray channels = output["pwm"].to<JsonArray>();
+  //   for (auto& ch : pwm_channels) {
+  //     JsonObject jo = channels.add<JsonObject>();
+  //     ch.generateUpdate(jo);
+  //   }
+  // #endif
 
-#ifdef YB_HAS_SERVO_CHANNELS
-  JsonArray servo_array = output["servo"].to<JsonArray>();
-  for (auto& ch : servo_channels) {
-    JsonObject jo = servo_array.add<JsonObject>();
-    ch.generateUpdate(jo);
-  }
-#endif
+  // #ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
+  //   JsonArray channels = output["dio"].to<JsonArray>();
+  //   for (auto& ch : digital_input_channels) {
+  //     JsonObject jo = channels.add<JsonObject>();
+  //     ch.generateUpdate(jo);
+  //   }
+  // #endif
 
-#ifdef YB_HAS_STEPPER_CHANNELS
-  JsonArray stepper_array = output["stepper"].to<JsonArray>();
-  for (auto& ch : stepper_channels) {
-    JsonObject jo = stepper_array.add<JsonObject>();
-    ch.generateUpdate(jo);
-  }
-#endif
+  // #ifdef YB_HAS_RELAY_CHANNELS
+  //   JsonArray r_channels = output["relay"].to<JsonArray>();
+  //   for (auto& ch : relay_channels) {
+  //     JsonObject jo = r_channels.add<JsonObject>();
+  //     ch.generateUpdate(jo);
+  //   }
+  // #endif
 
-// input / analog ADC channels
-#ifdef YB_HAS_ADC_CHANNELS
-  JsonArray channels = output["adc"].to<JsonArray>();
-  for (auto& ch : adc_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateUpdate(jo);
-  }
-#endif
+  // #ifdef YB_HAS_SERVO_CHANNELS
+  //   JsonArray servo_array = output["servo"].to<JsonArray>();
+  //   for (auto& ch : servo_channels) {
+  //     JsonObject jo = servo_array.add<JsonObject>();
+  //     ch.generateUpdate(jo);
+  //   }
+  // #endif
 
-#ifdef YB_IS_BRINEOMATIC
-  wm.generateUpdateJSON(output);
-#endif
+  // #ifdef YB_HAS_STEPPER_CHANNELS
+  //   JsonArray stepper_array = output["stepper"].to<JsonArray>();
+  //   for (auto& ch : stepper_channels) {
+  //     JsonObject jo = stepper_array.add<JsonObject>();
+  //     ch.generateUpdate(jo);
+  //   }
+  // #endif
+
+  // #ifdef YB_IS_BRINEOMATIC
+  //   wm.generateUpdateJSON(output);
+  // #endif
 }
 
 void ProtocolController::generateFastUpdateJSON(JsonVariant output)

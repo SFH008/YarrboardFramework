@@ -63,6 +63,10 @@ class YarrboardApp
     BaseController* getController(const char* name);
     const BaseController* getController(const char* name) const;
 
+    // Return a read-only reference to the vector container.
+    // The vector itself is const (cannot resize), but the pointers inside are mutable.
+    const etl::vector<BaseController*, YB_MAX_CONTROLLERS>& getControllers() const { return _controllers; };
+
     // Remove by name (returns true if removed)
     bool removeController(const char* name);
 

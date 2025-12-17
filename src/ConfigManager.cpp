@@ -23,9 +23,6 @@ bool ConfigManager::setup()
   // initialize error string
   char error[YB_ERROR_LENGTH] = "";
 
-  // start with defaults
-  initializeChannels();
-
   // load our config from the json file.
   if (loadConfigFromFile(YB_BOARD_CONFIG_PATH, error, sizeof(error))) {
     YBP.println("Configuration OK");
@@ -36,33 +33,6 @@ bool ConfigManager::setup()
   }
 
   return false;
-}
-
-void ConfigManager::initializeChannels()
-{
-#ifdef YB_HAS_ADC_CHANNELS
-  initChannels(adc_channels);
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-  initChannels(pwm_channels);
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  initChannels(digital_input_channels);
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  initChannels(relay_channels);
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  initChannels(servo_channels);
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  initChannels(stepper_channels);
-#endif
 }
 
 bool ConfigManager::saveConfig(char* error, size_t len)
@@ -160,60 +130,9 @@ void ConfigManager::generateBoardConfig(JsonVariant output)
   output["git_hash"] = GIT_HASH;
   output["build_time"] = BUILD_TIME;
 
-// output / pwm channels
-#ifdef YB_HAS_PWM_CHANNELS
-  JsonArray channels = output["pwm"].to<JsonArray>();
-  for (auto& ch : pwm_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateConfig(jo);
+  for (auto& c : _app.getControllers()) {
+    c->generateConfigHook(output);
   }
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  JsonArray channels = output["dio"].to<JsonArray>();
-  for (auto& ch : digital_input_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateConfig(jo);
-  }
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  JsonArray r_channels = output["relay"].to<JsonArray>();
-  for (auto& ch : relay_channels) {
-    JsonObject jo = r_channels.add<JsonObject>();
-    ch.generateConfig(jo);
-  }
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  JsonArray s_channels = output["servo"].to<JsonArray>();
-  for (auto& ch : servo_channels) {
-    JsonObject jo = s_channels.add<JsonObject>();
-    ch.generateConfig(jo);
-  }
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  JsonArray st_channels = output["stepper"].to<JsonArray>();
-  for (auto& ch : stepper_channels) {
-    JsonObject jo = st_channels.add<JsonObject>();
-    ch.generateConfig(jo);
-  }
-#endif
-
-// input / analog ADC channels
-#ifdef YB_HAS_ADC_CHANNELS
-  output["adc_resolution"] = YB_ADC_RESOLUTION;
-  JsonArray channels = output["adc"].to<JsonArray>();
-  for (auto& ch : adc_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    ch.generateConfig(jo);
-  }
-#endif
-
-#ifdef YB_IS_BRINEOMATIC
-  wm.generateConfigJSON(output);
-#endif
 }
 
 void ConfigManager::generateAppConfig(JsonVariant output)
@@ -452,76 +371,26 @@ bool ConfigManager::loadBoardConfigFromJSON(JsonVariant config, char* error, siz
   const char* v = config["name"] | YB_BOARD_NAME;
   strlcpy(board_name, v, sizeof(board_name));
 
-#ifdef YB_HAS_ADC_CHANNELS
-  if (config["adc"]) {
-    if (!loadChannelsConfigFromJSON("adc", adc_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
+  for (auto& c : _app.getControllers()) {
+    c->loadConfigHook(config, error, len);
   }
-#endif
 
-#ifdef YB_HAS_PWM_CHANNELS
-  if (config["pwm"]) {
-    if (!loadChannelsConfigFromJSON("pwm", pwm_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-  }
-#endif
+  // #ifdef YB_IS_BRINEOMATIC
+  //   if (config["brineomatic"]) {
+  //     JsonVariant bom = config["brineomatic"].as<JsonVariant>();
 
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  if (config["dio"]) {
-    if (!loadChannelsConfigFromJSON("dio", digital_input_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-  }
-#endif
+  //     // validate prunes invalid entries, so it's safe to load even on error.
+  //     // we don't want a single bad config option to nuke the whole config loading.
+  //     if (!wm.validateConfigJSON(bom, error, len)) {
+  //       YBP.println(error);
+  //       result = false;
+  //     }
 
-#ifdef YB_HAS_RELAY_CHANNELS
-  if (config["relay"]) {
-    if (!loadChannelsConfigFromJSON("relay", relay_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-  }
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  if (config["servo"]) {
-    if (!loadChannelsConfigFromJSON("servo", servo_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-  }
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  if (config["stepper"]) {
-    if (!loadChannelsConfigFromJSON("stepper", stepper_channels, config, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-  }
-#endif
-
-#ifdef YB_IS_BRINEOMATIC
-  if (config["brineomatic"]) {
-    JsonVariant bom = config["brineomatic"].as<JsonVariant>();
-
-    // validate prunes invalid entries, so it's safe to load even on error.
-    // we don't want a single bad config option to nuke the whole config loading.
-    if (!wm.validateConfigJSON(bom, error, len)) {
-      YBP.println(error);
-      result = false;
-    }
-
-    wm.loadGeneralConfigJSON(bom);
-    wm.loadHardwareConfigJSON(bom);
-    wm.loadSafeguardsConfigJSON(bom);
-  }
-#endif
+  //     wm.loadGeneralConfigJSON(bom);
+  //     wm.loadHardwareConfigJSON(bom);
+  //     wm.loadSafeguardsConfigJSON(bom);
+  //   }
+  // #endif
 
   return result;
 }

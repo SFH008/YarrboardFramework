@@ -10,6 +10,7 @@
 #define YARR_CHANNEL_CONTROLLER_H
 
 #include "YarrboardConfig.h"
+#include "YarrboardDebug.h"
 #include "controllers/BaseController.h"
 #include <Arduino.h>
 
@@ -26,14 +27,15 @@ class ChannelController : public BaseController
 
     bool loadConfigHook(JsonVariant config, char* error, size_t len) override
     {
+      // init everything with defaults
+      byte i = 0;
+      for (auto& ch : _channels) {
+        ch.init(i + 1);
+        i++;
+      }
+
       // did we get a config entry?
       if (config[_name]) {
-
-        // init everything with defaults
-        byte i = 0;
-        for (auto& ch : _channels) {
-          ch.init(i + 1);
-        }
 
         // now iterate over our initialized channels
         for (auto& ch : _channels) {
@@ -145,9 +147,84 @@ class ChannelController : public BaseController
       }
     }
 
-    // Channel* getChannelById(uint8_t id, etl::array<Channel, N>& channels)
-    // Channel* getChannelByKey(const char* key, etl::array<Channel, N>& channels)
-    // Channel* lookupChannel(JsonVariantConst input, JsonVariant output, etl::array<Channel, N>& channels)
+    ChannelType* getChannelById(uint8_t id)
+    {
+      static_assert(std::is_base_of<BaseChannel, ChannelType>::value,
+        "ChannelType must derive from BaseChannel");
+
+      for (auto& ch : _channels) {
+        if (ch.id == id)
+          return &ch;
+      }
+      return nullptr;
+    }
+
+    ChannelType* getChannelByKey(const char* key)
+    {
+      static_assert(std::is_base_of<BaseChannel, ChannelType>::value,
+        "ChannelType must derive from BaseChannel");
+
+      for (auto& ch : _channels) {
+        if (ch.key && key && !strcmp(key, ch.key))
+          return &ch;
+      }
+      return nullptr;
+    }
+
+    ChannelType* lookupChannel(JsonVariantConst input, JsonVariant output)
+    {
+      static_assert(std::is_base_of<BaseChannel, ChannelType>::value,
+        "ChannelType must derive from BaseChannel");
+
+      // Prefer 'id' if present
+      JsonVariantConst vId = input["id"];
+      JsonVariantConst vKey = input["key"];
+
+      if (!vId.isNull()) {
+        unsigned int id = 0;
+
+        if (vId.is<unsigned int>()) {
+          // direct integer
+          id = vId.as<unsigned int>();
+        } else if (vId.is<const char*>()) {
+          // string, attempt to parse
+          const char* idStr = vId.as<const char*>();
+          char* endPtr = nullptr;
+          id = strtoul(idStr, &endPtr, 10);
+          if (endPtr == idStr || *endPtr != '\0') {
+            ProtocolController::generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
+            return nullptr;
+          }
+        } else {
+          ProtocolController::generateErrorJSON(output, "Parameter 'id' must be an integer or numeric string");
+          return nullptr;
+        }
+
+        ChannelType* ch = getChannelById(id);
+        if (!ch) {
+          ProtocolController::generateErrorJSON(output, "Invalid channel id");
+          return nullptr;
+        }
+        return ch;
+      }
+
+      if (!vKey.isNull()) {
+        if (!vKey.is<const char*>()) {
+          ProtocolController::generateErrorJSON(output, "Parameter 'key' must be a string");
+          return nullptr;
+        }
+        const char* key = vKey.as<const char*>();
+        ChannelType* ch = getChannelByKey(key);
+        if (!ch) {
+          ProtocolController::generateErrorJSON(output, "Invalid channel key");
+          return nullptr;
+        }
+        return ch;
+      }
+
+      ProtocolController::generateErrorJSON(output, "You must pass in either 'id' or 'key' as a required parameter");
+      return nullptr;
+    }
 };
 
 #endif

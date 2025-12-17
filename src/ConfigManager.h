@@ -69,7 +69,6 @@ class ConfigManager
 
     // Lifecycle
     bool setup();
-    void initializeChannels();
 
     // Core Config Logic
     bool saveConfig(char* error, size_t len);
@@ -86,65 +85,6 @@ class ConfigManager
     void generateBoardConfig(JsonVariant output);
     void generateAppConfig(JsonVariant output);
     void generateNetworkConfig(JsonVariant output);
-
-    // Template method for loading channels (Must be in header)
-    template <typename Channel, size_t N>
-    void initChannels(etl::array<Channel, N>& channels)
-    {
-      for (byte i = 0; i < N; i++) {
-        channels[i].init(i + 1); // 1-based index for humans
-      }
-    }
-
-    // Template method for loading channel config (Must be in header)
-    template <typename Channel, size_t N>
-    bool loadChannelsConfig(const char* channel_key,
-      etl::array<Channel, N>& channels,
-      JsonVariantConst config,
-      char* error,
-      size_t len)
-    {
-      if (!config[channel_key]) {
-        snprintf(error, len, "Missing 'board.%s' config", channel_key);
-        return false;
-      }
-
-      // Reset to defaults first
-      initChannels(channels);
-
-      // Iterate over channels to load
-      for (auto& ch : channels) {
-        bool found = false;
-        for (JsonVariantConst ch_config : config[channel_key].as<JsonArrayConst>()) {
-          if (ch_config["id"] == ch.id) {
-
-            // Duplicate key check
-            const char* val = ch_config["key"].as<const char*>();
-            if (val && *val) {
-              for (auto& test_ch : channels) {
-                if (!strcmp(val, test_ch.key) && ch.id != test_ch.id) {
-                  snprintf(error, len, "%s channel #%d - duplicate key: %d/%s", channel_key, ch.id, test_ch.id, val);
-                  return false;
-                }
-              }
-            }
-
-            // Load specific config
-            if (ch.loadConfig(ch_config, error, len)) {
-              found = true;
-            } else {
-              return false;
-            }
-          }
-        }
-
-        if (!found) {
-          snprintf(error, len, "Missing 'board.%s' #%d config", channel_key, ch.id);
-          return false;
-        }
-      }
-      return true;
-    }
 
   private:
     YarrboardApp& _app;

@@ -8,11 +8,8 @@
 
 #include "controllers/MQTTController.h"
 #include "ConfigManager.h"
+#include "YarrboardApp.h"
 #include "YarrboardDebug.h"
-
-#ifdef YB_HAS_ADC_CHANNELS
-  #include "adc_channel.h"
-#endif
 
 #ifdef YB_HAS_PWM_CHANNELS
   #include "pwm_channel.h"
@@ -94,42 +91,15 @@ void MQTTController::loop()
   if (messageDelta >= 1000) {
     if (mqttClient.connected()) {
 
-#ifdef YB_HAS_ADC_CHANNELS
-      mqtt_update_channels(adc_channels);
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-      mqtt_update_channels(pwm_channels);
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-      mqtt_update_channels(digital_input_channels);
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-      mqtt_update_channels(relay_channels);
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-      mqtt_update_channels(servo_channels);
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-      mqtt_update_channels(stepper_channels);
-#endif
-
-#ifdef YB_IS_BRINEOMATIC
-      wm.updateMQTT();
-#endif
+      for (auto& c : _app.getControllers()) {
+        c->mqttUpdateHook();
+      }
 
       // separately update our Home Assistant status
       if (_cfg.app_enable_ha_integration) {
-#ifdef YB_HAS_PWM_CHANNELS
-        ha_update_channels(pwm_channels);
-#endif
-#ifdef YB_HAS_RELAY_CHANNELS
-        ha_update_channels(relay_channels);
-#endif
+        for (auto& c : _app.getControllers()) {
+          c->haUpdateHook();
+        }
       }
     }
 
@@ -244,25 +214,9 @@ void MQTTController::haDiscovery()
   // our components array
   JsonObject components = doc["cmps"].to<JsonObject>();
 
-// let each pwm channel create its own config
-#ifdef YB_HAS_PWM_CHANNELS
-  ha_generate_channels_discovery(pwm_channels, components);
-#endif
-
-// let each pwm channel create its own config
-#ifdef YB_HAS_RELAY_CHANNELS
-  ha_generate_channels_discovery(relay_channels, components);
-#endif
-
-// let each pwm channel create its own config
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  ha_generate_channels_discovery(digital_input_channels, components);
-#endif
-
-// let each pwm channel create its own config
-#ifdef YB_HAS_ADC_CHANNELS
-  ha_generate_channels_discovery(adc_channels, components);
-#endif
+  for (auto& c : _app.getControllers()) {
+    c->haGenerateDiscoveryHook(components);
+  }
 
   // dynamically allocate our buffer
   size_t jsonSize = measureJson(doc);

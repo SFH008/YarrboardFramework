@@ -51,36 +51,6 @@ void YarrboardApp::setup()
   YBP.println("Bus voltage ok");
 #endif
 
-#ifdef YB_HAS_ADC_CHANNELS
-  adc_channels_setup();
-  YBP.println("ADC channels ok");
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-  pwm_channels_setup();
-  YBP.println("PWM channels ok");
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  relay_channels_setup();
-  YBP.println("Relay channels ok");
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  servo_channels_setup();
-  YBP.println("Servo channels ok");
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  stepper_channels_setup();
-  YBP.println("Stepper channels ok");
-#endif
-
-#ifdef YB_HAS_FANS
-  fans_setup();
-  YBP.println("Fans ok");
-#endif
-
 #ifdef YB_IS_BRINEOMATIC
   brineomatic_setup();
 #endif
@@ -105,31 +75,6 @@ void YarrboardApp::loop()
 {
   // start our interval timer
   it.start();
-
-#ifdef YB_HAS_ADC_CHANNELS
-  adc_channels_loop();
-  it.time("adc_loop");
-#endif
-
-#ifdef YB_HAS_PWM_CHANNELS
-  pwm_channels_loop();
-  it.time("pwm_loop");
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  relay_channels_loop();
-  it.time("relay_loop");
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  servo_channels_loop();
-  it.time("servo_loop");
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  stepper_channels_loop();
-  it.time("stepper_loop");
-#endif
 
 #ifdef YB_HAS_FANS
   fans_loop();

@@ -61,16 +61,10 @@ class ProtocolController : public BaseController
     bool registerCommand(UserRole role, const char* command, ProtocolMessageHandler handler);
 
     // Overload 2: Member Function Helper
-    // Allows clean syntax: registerCommand(..., &Class::Method);
-    // This accepts ANY class method (T::*method).
-    // It wraps it in a lambda and delegates to the core function above.
     template <typename T>
-    bool registerCommand(UserRole role, const char* command, void (T::*method)(JsonVariantConst, JsonVariant))
+    bool registerCommand(UserRole role, const char* command, T* instance, void (T::*method)(JsonVariantConst, JsonVariant))
     {
-      // We cast 'this' to T* to ensure type safety if T is a base class
-      T* instance = static_cast<T*>(this);
-
-      // Delegate to the non-template function
+      // No casting needed on 'this'. We use the explicitly passed 'instance'.
       return registerCommand(role, command, [instance, method](JsonVariantConst in, JsonVariant out) {
         (instance->*method)(in, out);
       });
@@ -160,7 +154,6 @@ class ProtocolController : public BaseController
     void handleConfigSwitch(JsonVariantConst input, JsonVariant output);
     void handleConfigRGB(JsonVariantConst input, JsonVariant output);
     void handleSetRGB(JsonVariantConst input, JsonVariant output);
-    void handleConfigADC(JsonVariantConst input, JsonVariant output);
     void handleSetTheme(JsonVariantConst input, JsonVariant output);
     void handleSetBrightness(JsonVariantConst input, JsonVariant output);
 
