@@ -734,19 +734,7 @@ void ProtocolController::sendThemeUpdate()
   output["msg"] = "set_theme";
   output["theme"] = _cfg.app_theme;
 
-  // dynamically allocate our buffer
-  size_t jsonSize = measureJson(output);
-  char* jsonBuffer = (char*)malloc(jsonSize + 1);
-
-  // did we get anything?
-  if (jsonBuffer != NULL) {
-    jsonBuffer[jsonSize] = '\0'; // null terminate
-    serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, NOBODY);
-    free(jsonBuffer);
-  } else {
-    YBP.println("sendThemeUpdate() malloc failed.");
-  }
+  sendToAll(output, NOBODY);
 }
 
 void ProtocolController::sendBrightnessUpdate()
@@ -755,19 +743,7 @@ void ProtocolController::sendBrightnessUpdate()
   output["msg"] = "set_brightness";
   output["brightness"] = _cfg.globalBrightness;
 
-  // dynamically allocate our buffer
-  size_t jsonSize = measureJson(output);
-  char* jsonBuffer = (char*)malloc(jsonSize + 1);
-
-  // did we get anything?
-  if (jsonBuffer != NULL) {
-    jsonBuffer[jsonSize] = '\0'; // null terminate
-    serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, NOBODY);
-    free(jsonBuffer);
-  } else {
-    YBP.println("sendBrightnessUpdate() malloc failed.");
-  }
+  sendToAll(output, NOBODY);
 }
 
 void ProtocolController::sendFastUpdate()
@@ -782,19 +758,7 @@ void ProtocolController::sendFastUpdate()
     c->generateFastUpdateHook(output);
   }
 
-  // dynamically allocate our buffer
-  size_t jsonSize = measureJson(output);
-  char* jsonBuffer = (char*)malloc(jsonSize + 1);
-
-  // did we get anything?
-  if (jsonBuffer != NULL) {
-    jsonBuffer[jsonSize] = '\0'; // null terminate
-    serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, GUEST);
-    free(jsonBuffer);
-  } else {
-    YBP.println("sendFastUpdate() malloc failed.");
-  }
+  sendToAll(output, GUEST);
 }
 
 void ProtocolController::sendOTAProgressUpdate(float progress)
@@ -803,19 +767,7 @@ void ProtocolController::sendOTAProgressUpdate(float progress)
   output["msg"] = "ota_progress";
   output["progress"] = round2(progress);
 
-  // dynamically allocate our buffer
-  size_t jsonSize = measureJson(output);
-  char* jsonBuffer = (char*)malloc(jsonSize + 1);
-
-  // did we get anything?
-  if (jsonBuffer != NULL) {
-    jsonBuffer[jsonSize] = '\0'; // null terminate
-    serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, GUEST);
-    free(jsonBuffer);
-  } else {
-    YBP.println("sendOTAProgressUpdate() malloc failed.");
-  }
+  sendToAll(output, GUEST);
 }
 
 void ProtocolController::sendOTAProgressFinished()
@@ -823,19 +775,7 @@ void ProtocolController::sendOTAProgressFinished()
   JsonDocument output;
   output["msg"] = "ota_finished";
 
-  // dynamically allocate our buffer
-  size_t jsonSize = measureJson(output);
-  char* jsonBuffer = (char*)malloc(jsonSize + 1);
-
-  // did we get anything?
-  if (jsonBuffer != NULL) {
-    jsonBuffer[jsonSize] = '\0'; // null terminate
-    serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, GUEST);
-    free(jsonBuffer);
-  } else {
-    YBP.println("sendOTAProgressFinished() malloc failed.");
-  }
+  sendToAll(output, GUEST);
 }
 
 void ProtocolController::sendDebug(const char* message)
@@ -843,6 +783,11 @@ void ProtocolController::sendDebug(const char* message)
   JsonDocument output;
   output["debug"] = message;
 
+  sendToAll(output, NOBODY);
+}
+
+void ProtocolController::sendToAll(JsonVariantConst output, UserRole auth_level)
+{
   // dynamically allocate our buffer
   size_t jsonSize = measureJson(output);
   char* jsonBuffer = (char*)malloc(jsonSize + 1);
@@ -851,11 +796,11 @@ void ProtocolController::sendDebug(const char* message)
   if (jsonBuffer != NULL) {
     jsonBuffer[jsonSize] = '\0'; // null terminate
     serializeJson(output, jsonBuffer, jsonSize + 1);
-    sendToAll(jsonBuffer, NOBODY);
+    sendToAll(jsonBuffer, auth_level);
     free(jsonBuffer);
   } else {
     // dont call YBP b/c loops...
-    Serial.println("Error allocating in sendDebug()");
+    Serial.println("Error allocating in ProtocolController::sendToAll");
   }
 }
 

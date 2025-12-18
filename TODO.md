@@ -1,7 +1,5 @@
 ## v1.0.0 Release
 
-* protocolcontroller sendFoo functions -> consolidate the serialization boilerplate
-
 * test that dns and stuff works after improv
 * we need some way to indicate that a fast update is needed. (copy from pwm)
 * clean up auth a bit -> protocol auth handlers shouldnt deal with auth logic
@@ -16,7 +14,6 @@
 * global brightness
   * rgb controller -> setMaxBrightness()
   * onBrightness -> max * brightness
-
 
 * modify the gulp.js script to pull from the framework lib directory
   * it should also write the files to the framework lib directory for inclusion

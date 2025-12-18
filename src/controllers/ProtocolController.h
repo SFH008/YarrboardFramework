@@ -65,6 +65,7 @@ class ProtocolController : public BaseController
     void sendOTAProgressUpdate(float progress);
     void sendOTAProgressFinished();
     void sendDebug(const char* message);
+    void sendToAll(JsonVariantConst output, UserRole auth_level);
     void sendToAll(const char* jsonString, UserRole auth_level);
 
     void handleReceivedJSON(JsonVariantConst input, JsonVariant output, YBMode mode, PsychicWebSocketClient* connection = NULL);
