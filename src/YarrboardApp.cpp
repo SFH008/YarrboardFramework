@@ -57,10 +57,6 @@ void YarrboardApp::setup()
   // get our prefs early on.
   config.setup();
 
-#ifdef YB_IS_BRINEOMATIC
-  brineomatic_setup();
-#endif
-
   for (auto* c : _controllers) {
     if (c->setup())
       YBP.printf("✅ %s OK\n", c->getName());
@@ -70,6 +66,8 @@ void YarrboardApp::setup()
 
   // we're done with startup log
   YBP.removePrinter(startupLogger);
+
+  YBP.printf("Startup complete.\n");
 
   // network logger is a troublemaker
   YBP.addPrinter(networkLogger);
@@ -81,16 +79,6 @@ void YarrboardApp::loop()
 {
   // start our interval timer
   it.start();
-
-#ifdef YB_HAS_FANS
-  fans_loop();
-  it.time("fans_loop");
-#endif
-
-#ifdef YB_IS_BRINEOMATIC
-  brineomatic_loop();
-  it.time("brineomatic_loop");
-#endif
 
   for (auto* c : _controllers) {
     c->loop();

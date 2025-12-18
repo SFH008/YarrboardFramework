@@ -43,6 +43,7 @@ class ProtocolController : public BaseController
 
     bool unregisterCommand(const char* command);
     bool hasCommand(const char* command);
+    void printCommands();
 
     // Overload 1: Free Functions, Static Functions, Lambdas
     // Accepts any callable that matches the signature

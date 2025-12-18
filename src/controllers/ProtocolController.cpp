@@ -122,6 +122,13 @@ bool ProtocolController::hasCommand(const char* command)
   return commandMap.find(command) != commandMap.end();
 }
 
+void ProtocolController::printCommands()
+{
+  YBP.println("Protocol Commands:");
+  for (const auto& kvp : commandMap)
+    YBP.printf("%-6s | %s\n", getRoleText(kvp.second.role), kvp.first);
+}
+
 void ProtocolController::incrementSentMessages()
 {
   // keep track!
