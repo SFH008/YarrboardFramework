@@ -110,6 +110,7 @@ class ChannelController : public BaseController
         if (ch.sendFastUpdate)
           return true;
       }
+
       return false;
     }
 
@@ -122,16 +123,6 @@ class ChannelController : public BaseController
           ch.generateUpdate(jo);
           ch.sendFastUpdate = false;
         }
-      }
-    }
-
-    void generateStatsHook(JsonVariant output) override
-    {
-      // info about each of our channels
-      JsonArray channels = output[_name].to<JsonArray>();
-      for (auto& ch : _channels) {
-        JsonObject jo = channels.add<JsonObject>();
-        ch.generateStats(jo);
       }
     }
 
