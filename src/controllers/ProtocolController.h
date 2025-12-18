@@ -127,10 +127,7 @@ class ProtocolController : public BaseController
     void handleCrashMe(JsonVariantConst input, JsonVariant output);
     void handleFactoryReset(JsonVariantConst input, JsonVariant output);
     void handleOTAStart(JsonVariantConst input, JsonVariant output);
-    void handleConfigPWMChannel(JsonVariantConst input, JsonVariant output);
     void handlePlaySound(JsonVariantConst input, JsonVariant output);
-    void handleSetPWMChannel(JsonVariantConst input, JsonVariant output);
-    void handleTogglePWMChannel(JsonVariantConst input, JsonVariant output);
     void handleConfigRelayChannel(JsonVariantConst input, JsonVariant output);
     void handleSetRelayChannel(JsonVariantConst input, JsonVariant output);
     void handleToggleRelayChannel(JsonVariantConst input, JsonVariant output);

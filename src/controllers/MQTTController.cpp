@@ -11,26 +11,6 @@
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 
-#ifdef YB_HAS_PWM_CHANNELS
-  #include "pwm_channel.h"
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  #include "digital_input_channel.h"
-#endif
-
-#ifdef YB_HAS_RELAY_CHANNELS
-  #include "relay_channel.h"
-#endif
-
-#ifdef YB_HAS_STEPPER_CHANNELS
-  #include "stepper_channel.h"
-#endif
-
-#ifdef YB_HAS_SERVO_CHANNELS
-  #include "servo_channel.h"
-#endif
-
 MQTTController* MQTTController::_instance = nullptr;
 
 MQTTController::MQTTController(YarrboardApp& app) : BaseController(app, "mqtt")

@@ -30,9 +30,6 @@ bool ProtocolController::setup()
   registerCommand(GUEST, "set_brightness", this, &ProtocolController::handleSetBrightness);
 
   registerCommand(GUEST, "play_sound", this, &ProtocolController::handlePlaySound);
-
-  registerCommand(GUEST, "set_pwm_channel", this, &ProtocolController::handleSetPWMChannel);
-  registerCommand(GUEST, "toggle_pwm_channel", this, &ProtocolController::handleTogglePWMChannel);
   registerCommand(GUEST, "set_relay_channel", this, &ProtocolController::handleSetRelayChannel);
   registerCommand(GUEST, "toggle_relay_channel", this, &ProtocolController::handleToggleRelayChannel);
   registerCommand(GUEST, "set_servo_channel", this, &ProtocolController::handleSetServoChannel);
@@ -67,7 +64,6 @@ bool ProtocolController::setup()
   registerCommand(ADMIN, "factory_reset", this, &ProtocolController::handleFactoryReset);
   registerCommand(ADMIN, "ota_start", this, &ProtocolController::handleOTAStart);
 
-  registerCommand(ADMIN, "config_pwm_channel", this, &ProtocolController::handleConfigPWMChannel);
   registerCommand(ADMIN, "config_relay_channel", this, &ProtocolController::handleConfigRelayChannel);
   registerCommand(ADMIN, "config_servo_channel", this, &ProtocolController::handleConfigServoChannel);
   registerCommand(ADMIN, "config_stepper_channel", this, &ProtocolController::handleConfigStepperChannel);
@@ -728,133 +724,6 @@ void ProtocolController::handlePlaySound(JsonVariantConst input, JsonVariant out
 #endif
 }
 
-void ProtocolController::handleSetPWMChannel(JsonVariantConst input, JsonVariant output)
-{
-#ifdef YB_HAS_PWM_CHANNELS
-
-  // load our channel
-  auto* ch = lookupChannel(input, output, pwm_channels);
-  if (!ch)
-    return;
-
-  // is it enabled?
-  if (!ch->isEnabled)
-    return generateErrorJSON(output, "Channel is not enabled.");
-
-  // our duty cycle
-  if (input["duty"].is<float>()) {
-    // is it enabled?
-    if (!ch->isEnabled)
-      return generateErrorJSON(output, "Channel is not enabled.");
-
-    float duty = input["duty"];
-
-    // what do we hate?  va-li-date!
-    if (duty < 0)
-      return generateErrorJSON(output, "Duty cycle must be >= 0");
-    else if (duty > 1)
-      return generateErrorJSON(output, "Duty cycle must be <= 1");
-
-    // okay, we're good.
-    ch->setDuty(duty);
-
-    // change our output pin to reflect
-    ch->updateOutput(true);
-  }
-
-  // change state
-  if (input["state"].is<String>()) {
-    // source is required
-    if (!input["source"].is<String>())
-      return generateErrorJSON(output, "'source' is a required parameter");
-
-    // check the length
-    char error[50];
-    if (strlen(input["source"]) > YB_HOSTNAME_LENGTH - 1) {
-      sprintf(error, "Maximum source length is %s characters.", YB_HOSTNAME_LENGTH - 1);
-      return generateErrorJSON(output, error);
-    }
-
-    // get our data
-    strlcpy(ch->source, input["source"] | local_hostname, sizeof(ch->source));
-
-    // okay, set our state
-    char state[10];
-    strlcpy(state, input["state"] | "OFF", sizeof(state));
-
-    // update our pwm channel
-    ch->setState(state);
-
-    // get that update out ASAP... if its our own update
-    if (!strcmp(ch->source, local_hostname))
-      sendFastUpdate();
-  }
-#else
-  return generateErrorJSON(output, "Board does not have output channels.");
-#endif
-}
-
-void ProtocolController::handleConfigPWMChannel(JsonVariantConst input, JsonVariant output)
-{
-#ifdef YB_HAS_PWM_CHANNELS
-  char error[128];
-
-  // load our channel
-  auto* ch = lookupChannel(input, output, pwm_channels);
-  if (!ch)
-    return;
-
-  if (!input["config"].is<JsonObjectConst>()) {
-    snprintf(error, sizeof(error), "'config' is required parameter");
-    return generateErrorJSON(output, error);
-  }
-
-  if (!ch->loadConfig(input["config"], error, sizeof(error))) {
-    return generateErrorJSON(output, error);
-  }
-
-  // write it to file
-  if (!saveConfig(error, sizeof(error)))
-    return generateErrorJSON(output, error);
-#else
-  return generateErrorJSON(output, "Board does not have pwm channels.");
-#endif
-}
-
-void ProtocolController::handleTogglePWMChannel(JsonVariantConst input, JsonVariant output)
-{
-#ifdef YB_HAS_PWM_CHANNELS
-
-  // load our channel
-  auto* ch = lookupChannel(input, output, pwm_channels);
-  if (!ch)
-    return;
-
-  // source is required
-  if (!input["source"].is<String>())
-    return generateErrorJSON(output, "'source' is a required parameter");
-
-  // check the length
-  char error[50];
-  if (strlen(input["source"]) > YB_HOSTNAME_LENGTH - 1) {
-    sprintf(error, "Maximum source length is %s characters.", YB_HOSTNAME_LENGTH - 1);
-    return generateErrorJSON(output, error);
-  }
-
-  // save our source
-  strlcpy(ch->source, input["source"] | local_hostname, sizeof(ch->source));
-
-  // these states should all change to off
-  if (!strcmp(ch->getStatus(), "ON") || !strcmp(ch->getStatus(), "TRIPPED") || !strcmp(ch->getStatus(), "BLOWN"))
-    ch->setState("OFF");
-  // OFF and BYPASS can be turned on.
-  else
-    ch->setState("ON");
-#else
-  return generateErrorJSON(output, "Board does not have output channels.");
-#endif
-}
-
 void ProtocolController::handleConfigRelayChannel(JsonVariantConst input, JsonVariant output)
 {
 #ifdef YB_HAS_RELAY_CHANNELS
@@ -916,7 +785,7 @@ void ProtocolController::handleSetRelayChannel(JsonVariantConst input, JsonVaria
     char state[10];
     strlcpy(state, input["state"] | "OFF", sizeof(state));
 
-    // update our pwm channel
+    // update our relay channel
     ch->setState(state);
 
     // get that update out ASAP... if its our own update
@@ -1102,14 +971,8 @@ void ProtocolController::handleSetBrightness(JsonVariantConst input, JsonVariant
 
     _cfg.globalBrightness = brightness;
 
-// TODO: need to put this on a time delay
-// preferences.putFloat("brightness", globalBrightness);
-
-// loop through all our light stuff and update outputs
-#ifdef YB_HAS_PWM_CHANNELS
-    for (auto& ch : pwm_channels)
-      ch.updateOutput(true);
-#endif
+    // TODO: need to put this on a time delay
+    // preferences.putFloat("brightness", globalBrightness);
 
     sendBrightnessUpdate();
   } else
@@ -1415,46 +1278,6 @@ void ProtocolController::generateUpdateJSON(JsonVariant output)
     c->generateUpdateHook(output);
   }
 
-  // #ifdef YB_HAS_PWM_CHANNELS
-  //   JsonArray channels = output["pwm"].to<JsonArray>();
-  //   for (auto& ch : pwm_channels) {
-  //     JsonObject jo = channels.add<JsonObject>();
-  //     ch.generateUpdate(jo);
-  //   }
-  // #endif
-
-  // #ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  //   JsonArray channels = output["dio"].to<JsonArray>();
-  //   for (auto& ch : digital_input_channels) {
-  //     JsonObject jo = channels.add<JsonObject>();
-  //     ch.generateUpdate(jo);
-  //   }
-  // #endif
-
-  // #ifdef YB_HAS_RELAY_CHANNELS
-  //   JsonArray r_channels = output["relay"].to<JsonArray>();
-  //   for (auto& ch : relay_channels) {
-  //     JsonObject jo = r_channels.add<JsonObject>();
-  //     ch.generateUpdate(jo);
-  //   }
-  // #endif
-
-  // #ifdef YB_HAS_SERVO_CHANNELS
-  //   JsonArray servo_array = output["servo"].to<JsonArray>();
-  //   for (auto& ch : servo_channels) {
-  //     JsonObject jo = servo_array.add<JsonObject>();
-  //     ch.generateUpdate(jo);
-  //   }
-  // #endif
-
-  // #ifdef YB_HAS_STEPPER_CHANNELS
-  //   JsonArray stepper_array = output["stepper"].to<JsonArray>();
-  //   for (auto& ch : stepper_channels) {
-  //     JsonObject jo = stepper_array.add<JsonObject>();
-  //     ch.generateUpdate(jo);
-  //   }
-  // #endif
-
   // #ifdef YB_IS_BRINEOMATIC
   //   wm.generateUpdateJSON(output);
   // #endif
@@ -1469,30 +1292,6 @@ void ProtocolController::generateFastUpdateJSON(JsonVariant output)
   for (auto& c : _app.getControllers()) {
     c->generateFastUpdateHook(output);
   }
-
-  byte j;
-
-#ifdef YB_HAS_PWM_CHANNELS
-  JsonArray channels = output["pwm"].to<JsonArray>();
-  for (auto& ch : pwm_channels) {
-    if (ch.sendFastUpdate) {
-      JsonObject jo = channels.add<JsonObject>();
-      ch.generateUpdate(jo);
-      ch.sendFastUpdate = false;
-    }
-  }
-#endif
-
-#ifdef YB_HAS_DIGITAL_INPUT_CHANNELS
-  JsonArray channels = output["dio"].to<JsonArray>();
-  for (auto& ch : digital_input_channels) {
-    if (ch.sendFastUpdate) {
-      JsonObject jo = channels.add<JsonObject>();
-      ch.generateUpdate(jo);
-      ch.sendFastUpdate = false;
-    }
-  }
-#endif
 }
 
 void ProtocolController::generateStatsJSON(JsonVariant output)
@@ -1525,21 +1324,6 @@ void ProtocolController::generateStatsJSON(JsonVariant output)
   for (auto& c : _app.getControllers()) {
     c->generateStatsHook(output);
   }
-
-#ifdef YB_HAS_PWM_CHANNELS
-  // info about each of our channels
-  JsonArray channels = output["pwm"].to<JsonArray>();
-  for (auto& ch : pwm_channels) {
-    JsonObject jo = channels.add<JsonObject>();
-    jo["id"] = ch.id;
-    jo["name"] = ch.name;
-    jo["aH"] = ch.ampHours;
-    jo["wH"] = ch.wattHours;
-    jo["state_change_count"] = ch.stateChangeCount;
-    jo["soft_fuse_trip_count"] =
-      ch.softFuseTripCount;
-  }
-#endif
 
 #ifdef YB_IS_BRINEOMATIC
   output["brineomatic"] = true;
