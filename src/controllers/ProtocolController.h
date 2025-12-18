@@ -128,11 +128,6 @@ class ProtocolController : public BaseController
     void handleCrashMe(JsonVariantConst input, JsonVariant output);
     void handleFactoryReset(JsonVariantConst input, JsonVariant output);
     void handleOTAStart(JsonVariantConst input, JsonVariant output);
-    void handlePlaySound(JsonVariantConst input, JsonVariant output);
-    void handleSetSwitch(JsonVariantConst input, JsonVariant output);
-    void handleConfigSwitch(JsonVariantConst input, JsonVariant output);
-    void handleConfigRGB(JsonVariantConst input, JsonVariant output);
-    void handleSetRGB(JsonVariantConst input, JsonVariant output);
     void handleSetTheme(JsonVariantConst input, JsonVariant output);
     void handleSetBrightness(JsonVariantConst input, JsonVariant output);
 

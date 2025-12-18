@@ -19,10 +19,6 @@
 #include <PsychicHttpsServer.h>
 #include <freertos/queue.h>
 
-// generated at build by running "gulp" in the firmware directory.
-// #include "index.html.gz.h"
-// #include "logo.png.gz.h"
-
 typedef struct {
     int socket;
     char* buffer;

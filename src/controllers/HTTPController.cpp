@@ -10,18 +10,6 @@ HTTPController::HTTPController(YarrboardApp& app) : BaseController(app, "http")
 
 bool HTTPController::setup()
 {
-  // if (!index_length) {
-  //   index_length = index_html_gz_len;
-  //   index_sha = index_html_gz_sha;
-  //   index_data = index_html_gz;
-  // }
-
-  // if (!logo_length) {
-  //   logo_length = logo_gz_len;
-  //   logo_sha = logo_gz_sha;
-  //   logo_data = logo_gz;
-  // }
-
   sendMutex = xSemaphoreCreateMutex();
   if (sendMutex == NULL) {
     YBP.println("Failed to create send mutex");

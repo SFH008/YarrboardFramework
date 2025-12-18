@@ -43,13 +43,6 @@ bool ProtocolController::setup()
   registerCommand(ADMIN, "factory_reset", this, &ProtocolController::handleFactoryReset);
   registerCommand(ADMIN, "ota_start", this, &ProtocolController::handleOTAStart);
 
-  // send serial a config off the bat
-  if (_cfg.app_enable_serial) {
-    JsonDocument output;
-    generateConfigJSON(output);
-    serializeJson(output, Serial);
-  }
-
   return true;
 }
 

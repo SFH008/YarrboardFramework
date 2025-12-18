@@ -179,6 +179,9 @@ void NetworkController::setupImprov()
   // wait for improv to complete
   while (_cfg.is_first_boot)
     improvSerial.handleSerial();
+
+  // we're connected, so start us up.
+  startServices();
 }
 
 // ==========================================================

@@ -23,7 +23,15 @@ class ChannelController : public BaseController
     etl::array<ChannelType, COUNT> _channels;
 
   public:
-    ChannelController(YarrboardApp& app, const char* name) : BaseController(app, name) {}
+    ChannelController(YarrboardApp& app, const char* name) : BaseController(app, name)
+    {
+      // init everything with defaults
+      byte i = 0;
+      for (auto& ch : _channels) {
+        ch.init(i + 1);
+        i++;
+      }
+    }
 
     etl::array<ChannelType, COUNT>& getChannels()
     {
@@ -32,13 +40,6 @@ class ChannelController : public BaseController
 
     bool loadConfigHook(JsonVariant config, char* error, size_t len) override
     {
-      // init everything with defaults
-      byte i = 0;
-      for (auto& ch : _channels) {
-        ch.init(i + 1);
-        i++;
-      }
-
       // did we get a config entry?
       if (config[_name]) {
 
