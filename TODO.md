@@ -6,8 +6,6 @@
 * add our interval timer info to loop speed
   * debug -> controller
 
-* fix our CI hooks
-
 ## Long Term
 
 * modify the gulp.js script to pull from the framework lib directory

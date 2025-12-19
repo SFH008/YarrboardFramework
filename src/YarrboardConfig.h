@@ -11,6 +11,7 @@
  */
 
 #include "YarrboardVersion.h"
+#include <Arduino.h>
 
 #ifndef YB_FRAMEWORK_CONFIG_H
   #define YB_FRAMEWORK_CONFIG_H
@@ -27,6 +28,14 @@
   #endif
   #ifndef YB_DEFAULT_AP_PASS
     #define YB_DEFAULT_AP_PASS ""
+  #endif
+
+  // esp32-s3 does not have bluetooth.
+  #if defined(CONFIG_IDF_TARGET_ESP32S2)
+    #define YB_BLUETOOTH_SUPPORTED 0
+    #define YB_DISABLE_IMPROV_BLE
+  #else
+    #define YB_BLUETOOTH_SUPPORTED 1
   #endif
 
   // time before saving fade pwm to preserve flash

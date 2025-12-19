@@ -166,6 +166,7 @@ void NetworkController::setupImprov()
   improvSerial.onImprovConnected(_onImprovConnectedStatic);
 
   // Bluetooth Configuration
+#ifndef YB_DISABLE_IMPROV_BLE
   improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32,
     _cfg.board_name,
     _app.firmware_version,
@@ -175,6 +176,7 @@ void NetworkController::setupImprov()
   improvBLE.onImprovError(_onImprovErrorStatic);
   improvBLE.setCustomConnectWiFi(_onImprovCustomConnectWiFiStatic);
   improvBLE.onImprovConnected(_onImprovConnectedStatic);
+#endif
 
   // wait for improv to complete
   while (_cfg.is_first_boot)

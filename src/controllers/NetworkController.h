@@ -13,7 +13,9 @@
 #include "controllers/BaseController.h"
 #include <DNSServer.h>
 #include <ESPmDNS.h>
-#include <ImprovWiFiBLE.h>
+#ifndef YB_DISABLE_IMPROV_BLE
+  #include <ImprovWiFiBLE.h>
+#endif
 #include <ImprovWiFiLibrary.h>
 #include <WiFi.h>
 
@@ -37,7 +39,10 @@ class NetworkController : public BaseController
 
   private:
     ImprovWiFi improvSerial;
+
+#ifndef YB_DISABLE_IMPROV_BLE
     ImprovWiFiBLE improvBLE;
+#endif
 
     // for making a captive portal
     //  The default android DNS
