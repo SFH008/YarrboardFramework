@@ -17,10 +17,6 @@
 #include "etl/vector.h"
 #include <Arduino.h>
 #include <LittleFS.h>
-#include <esp_core_dump.h>
-#include <esp_log.h>
-#include <esp_partition.h>
-#include <esp_system.h>
 
 #define ARDUINOTRACE_SERIAL YBP
 #include <ArduinoTrace.h>
@@ -28,17 +24,6 @@
 #ifdef YB_USB_SERIAL
   #include "USB.h"
 #endif
-
-extern bool has_coredump;
-
-void debug_setup();
-
-String getResetReason();
-bool checkCoreDump();
-bool saveCoreDumpToFile(const char* path);
-bool deleteCoreDump();
-void crash_me_hard();
-int debug_log_vprintf(const char* fmt, va_list args);
 
 class YarrboardPrint : public Print
 {

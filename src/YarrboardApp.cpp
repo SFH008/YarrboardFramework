@@ -14,6 +14,7 @@
 #include "YarrboardDebug.h"
 
 YarrboardApp::YarrboardApp() : config(*this),
+                               debug(*this),
                                network(*this),
                                http(*this),
                                protocol(*this),
@@ -26,6 +27,8 @@ YarrboardApp::YarrboardApp() : config(*this),
                                framerateAvg(10, 10000)
 
 {
+  registerController(debug);
+  registerController(config);
   registerController(network);
   registerController(ntp);
   registerController(http);
@@ -38,26 +41,6 @@ void YarrboardApp::setup()
 {
   // register this here because it should be called last.
   registerController(mqtt);
-
-  debug_setup();
-
-  YBP.println("Yarrboard");
-  YBP.print("Hardware Version: ");
-  YBP.println(hardware_version);
-  YBP.print("Firmware Version: ");
-  YBP.println(firmware_version);
-  YBP.printf("Firmware build: %s (%s)\n", GIT_HASH, BUILD_TIME);
-  YBP.print("Last Reset: ");
-  YBP.println(getResetReason());
-
-  // we need littlefs to store our coredump
-  if (!LittleFS.begin(true)) {
-    YBP.println("ERROR: Unable to mount LittleFS");
-  }
-  YBP.printf("LittleFS Storage: %d / %d\n", LittleFS.usedBytes(), LittleFS.totalBytes());
-
-  // get our prefs early on.
-  config.setup();
 
   for (auto* c : _controllers) {
     if (c->setup())

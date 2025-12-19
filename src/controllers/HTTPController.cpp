@@ -190,8 +190,7 @@ bool HTTPController::setup()
 
   // downloadable coredump file
   server->on("/coredump.bin", HTTP_GET, [this](PsychicRequest* request, PsychicResponse* response) {
-    deleteCoreDump(); // clear ESP flash dump
-    has_coredump = false;
+    _app.debug.deleteCoreDump(); // clear ESP flash dump
 
     if (!LittleFS.exists("/coredump.bin")) {
       response->setCode(404);

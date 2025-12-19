@@ -4,7 +4,8 @@
 * add a project url -> eg. brineomatic.com
 
 * add our interval timer info to loop speed
-  * debug -> controller
+
+* create a README describing the project
 
 ## Long Term
 

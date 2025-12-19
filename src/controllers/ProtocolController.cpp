@@ -39,7 +39,6 @@ bool ProtocolController::setup()
   registerCommand(ADMIN, "set_mqtt_config", this, &ProtocolController::handleSetMQTTConfig);
   registerCommand(ADMIN, "set_misc_config", this, &ProtocolController::handleSetMiscellaneousConfig);
   registerCommand(ADMIN, "restart", this, &ProtocolController::handleRestart);
-  registerCommand(ADMIN, "crashme", this, &ProtocolController::handleCrashMe);
   registerCommand(ADMIN, "factory_reset", this, &ProtocolController::handleFactoryReset);
   registerCommand(ADMIN, "ota_start", this, &ProtocolController::handleOTAStart);
 
@@ -624,13 +623,6 @@ void ProtocolController::handleRestart(JsonVariantConst input, JsonVariant outpu
   ESP.restart();
 }
 
-void ProtocolController::handleCrashMe(JsonVariantConst input, JsonVariant output)
-{
-#ifdef YB_IS_DEVELOPMENT
-  crash_me_hard();
-#endif
-}
-
 void ProtocolController::handleFactoryReset(JsonVariantConst input, JsonVariant output)
 {
   // delete all our prefs
@@ -711,9 +703,9 @@ void ProtocolController::generateConfigMessage(JsonVariant output)
   output["is_development"] = YB_IS_DEVELOPMENT;
 
   // some debug info
-  output["last_restart_reason"] = getResetReason();
-  if (has_coredump)
-    output["has_coredump"] = has_coredump;
+  output["last_restart_reason"] = _app.debug.getResetReason();
+  if (_app.debug.hasCoredump())
+    output["has_coredump"] = _app.debug.hasCoredump();
   output["boot_log"] = startupLogger.c_str();
 
   // do we want to flag it for config?

@@ -15,6 +15,7 @@
 
 #include "YarrboardConfig.h"
 #include "controllers/AuthController.h"
+#include "controllers/BaseController.h"
 #include "etl/array.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -23,7 +24,7 @@
 
 class YarrboardApp;
 
-class ConfigManager
+class ConfigManager : public BaseController
 {
   public:
     Preferences preferences;
@@ -66,7 +67,7 @@ class ConfigManager
     ConfigManager(YarrboardApp& app);
 
     // Lifecycle
-    bool setup();
+    bool setup() override;
 
     // Core Config Logic
     bool saveConfig(char* error, size_t len);

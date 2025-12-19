@@ -2,7 +2,9 @@
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
 
-ConfigManager::ConfigManager(YarrboardApp& app) : _app(app), is_first_boot(true)
+ConfigManager::ConfigManager(YarrboardApp& app) : BaseController(app, "config"),
+                                                  _app(app),
+                                                  is_first_boot(true)
 {
 }
 
@@ -33,9 +35,7 @@ bool ConfigManager::setup()
   api_role = _app.default_role;
 
   if (preferences.begin("yarrboard", false)) {
-    YBP.println("Prefs OK");
     YBP.printf("There are: %u entries available in the 'yarrboard' prefs table.\n", preferences.freeEntries());
-
   } else {
     YBP.println("Opening Preferences failed.");
     return false;
@@ -49,14 +49,11 @@ bool ConfigManager::setup()
 
   // load our config from the json file.
   if (loadConfigFromFile(YB_BOARD_CONFIG_PATH, error, sizeof(error))) {
-    YBP.println("Configuration OK");
     return true;
   } else {
     YBP.printf("CONFIG ERROR: %s\n", error);
     return false;
   }
-
-  return false;
 }
 
 bool ConfigManager::saveConfig(char* error, size_t len)
