@@ -107,7 +107,6 @@ class YarrboardApp
     WebsocketPrint networkLogger;
 
     // various timer things.
-    IntervalTimer it;
     RollingAverage loopSpeed;
     RollingAverage framerateAvg;
     unsigned long lastLoopMicros = 0;

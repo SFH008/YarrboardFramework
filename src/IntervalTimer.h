@@ -2,6 +2,7 @@
 #pragma once
 #include "YarrboardDebug.h"
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <cstring>
 #include <stdint.h>
 #include <vector>
@@ -75,6 +76,25 @@ class IntervalTimer
       }
       YBP.printf("Total: avg=%lu us\n",
         static_cast<unsigned long>(total_us));
+    }
+
+    void generateJSON(JsonVariant output)
+    {
+      if (_entries.empty())
+        return;
+
+      JsonArray times = output["loop_timer"].to<JsonArray>();
+
+      for (const auto& e : _entries) {
+        if (e.count == 0)
+          continue;
+
+        const uint32_t avg_us = static_cast<uint32_t>(e.total_us / e.count);
+
+        JsonObject entry = times.add<JsonObject>();
+        entry["name"] = e.label;
+        entry["usec"] = avg_us;
+      }
     }
 
   private:

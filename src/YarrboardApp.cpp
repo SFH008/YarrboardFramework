@@ -63,18 +63,12 @@ void YarrboardApp::setup()
 void YarrboardApp::loop()
 {
   // start our interval timer
-  it.start();
+  debug.it.start();
 
   for (auto* c : _controllers) {
     c->loop();
-    it.time(c->getName());
+    debug.it.time(c->getName());
   }
-
-  // our debug.
-  // it.print(5000);
-
-  // if (INTERVAL(1000))
-  //   DUMP(millis());
 
   // calculate our framerate
   unsigned long loopDelta = micros() - lastLoopMicros;

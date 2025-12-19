@@ -110,6 +110,11 @@ bool DebugController::setup()
   return true;
 }
 
+void DebugController::generateStatsHook(JsonVariant output)
+{
+  it.generateJSON(output);
+}
+
 void DebugController::handleCrashMe(JsonVariantConst input, JsonVariant output)
 {
   crashMeHard();
