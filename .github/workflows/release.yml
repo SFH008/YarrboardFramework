@@ -1,6 +1,6 @@
 ---
 
-name: Release to Platform IO and Arduino
+name: Release to Platform IO
 
 on:
   release:
@@ -20,10 +20,8 @@ jobs:
         run: |
           TAG_VERSION=$(sed "s/^v//" <<< $GITHUB_REF_NAME)
           PLATFORMIO_VERSION=$(jq ".version" library.json -r)
-          ARDUINO_VERSION=$(awk -F= '/version/{gsub(/"/, "", $2); print $2}' library.properties)
           echo TAG_VERSION=$TAG_VERSION >> $GITHUB_ENV
           echo PLATFORMIO_VERSION=$PLATFORMIO_VERSION >> $GITHUB_ENV
-          echo ARDUINO_VERSION=$ARDUINO_VERSION >> $GITHUB_ENV
       - name: Check the version number is semver compliant
         run: |
           if ! [[ $TAG_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]*[0-9]+)?$ ]]; then
@@ -34,12 +32,6 @@ jobs:
         run: |
           if [ "$TAG_VERSION" != "$PLATFORMIO_VERSION" ]; then
             echo "ERROR: The version number in library.json ($PLATFORMIO_VERSION) does not match the tag number ($TAG_VERSION)"
-            exit 1
-          fi
-      - name: Check the Arduino version matches the tag number
-        run: |
-          if [ "$TAG_VERSION" != "$ARDUINO_VERSION" ]; then
-            echo "ERROR: The version number in library.properties ($ARDUINO_VERSION) does not match the tag number ($TAG_VERSION)"
             exit 1
           fi
 

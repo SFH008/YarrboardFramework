@@ -2,12 +2,11 @@
 
 * add a board url -> eg. github.com/brineomatic-rev-b
 * add a project url -> eg. brineomatic.com
+
 * add our interval timer info to loop speed
+  * debug -> controller
 
 * fix our CI hooks
-* copy the release.yml from psychic
-* setup module on arduino
-* setup module on platformio
 
 ## Long Term
 
