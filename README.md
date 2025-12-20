@@ -2,7 +2,7 @@
 
 **A comprehensive IoT application framework for ESP32 microcontrollers with modern web-based configuration and control.**
 
-YarrboardFramework provides a complete embedded web server infrastructure for building ESP32-based IoT devices. Designed for reuse across multiple firmware projects, it delivers a standardized, production-ready foundation with rich web interfaces, multi-protocol support, and home automation integration.
+YarrboardFramework provides a complete embedded web server infrastructure for building ESP32-based IoT devices. Designed for reuse across multiple firmware projects, it delivers a standardized, production-ready-ish foundation with rich web interfaces, multi-protocol support, and home automation integration.
 
 ## License
 
