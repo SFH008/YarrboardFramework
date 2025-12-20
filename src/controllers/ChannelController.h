@@ -13,12 +13,11 @@
 #ifndef YARR_CHANNEL_CONTROLLER_H
 #define YARR_CHANNEL_CONTROLLER_H
 
+#include "YarrboardApp.h"
 #include "YarrboardConfig.h"
 #include "YarrboardDebug.h"
 #include "controllers/BaseController.h"
 #include <Arduino.h>
-
-class YarrboardApp;
 
 template <typename ChannelType, size_t COUNT>
 class ChannelController : public BaseController
