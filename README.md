@@ -15,7 +15,7 @@ All framework source code is licensed under MPL-2.0, allowing commercial use and
 ### Core Capabilities
 
 - **Web-Based Configuration**: Modern single-page application with real-time updates via WebSocket
-- **Multi-Protocol Support**: HTTP/HTTPS, WebSocket, MQTT, Serial communication
+- **JSON-Based Multi-Protocol**: Use the same JSON commands over Websocket, HTTP, Serial, or MQTT
 - **Home Assistant Integration**: Automatic MQTT discovery protocol implementation
 - **OTA Firmware Updates**: Development (Arduino OTA) and production (signed esp32FOTA) support
 - **WiFi Management**: AP/Client modes with Improv provisioning for first-boot setup
