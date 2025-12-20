@@ -107,20 +107,6 @@
             <div class="mx-3 mt-3">
                 <div id="liveAlertPlaceholder"></div>
                 <div id="controlPage" class="pageContainer row" style="display:none">
-                    <div id="adcControlDiv" style="display:none" class="col-md-12">
-                        <h4 class="text-center">Analog Inputs</h4>
-                        <table id="adcTable" class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Value</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adcTableBody" class="table-group-divider"></tbody>
-                        </table>
-                    </div>
                 </div>
                 <div id="configPage" class="pageContainer" style="display:none">
                     <form class="row g-3" id="ConfigForm">
@@ -207,20 +193,39 @@
                                                         <td id="hardware_version" class="text-end"></td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Yarrboard Client</th>
-                                                        <td id="yarrboard_client_version" class="text-end"></td>
-                                                    </tr>
-                                                    <tr>
                                                         <th scope="row">ESP-IDF</th>
-                                                        <td id="esp_idf_version" class="text-end"></td>
+                                                        <td class="text-end">
+                                                            <a href="https://github.com/espressif/esp-idf"
+                                                                id="esp_idf_version"></a>
+                                                        </td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Arduino</th>
-                                                        <td id="arduino_version" class="text-end"></td>
+                                                        <th scope="row">PIOArduino</th>
+                                                        <td class="text-end">
+                                                            <a href="https://github.com/pioarduino/platform-espressif32"
+                                                                id="arduino_version"></a>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">PsychicHttp</th>
-                                                        <td id="psychic_http_version" class="text-end"></td>
+                                                        <td class="text-end">
+                                                            <a href="https://github.com/hoeken/PsychicHttp"
+                                                                id="psychic_http_version"></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Yarrboard Framework</th>
+                                                        <td class="text-end">
+                                                            <a href="https://github.com/hoeken/YarrboardFramework"
+                                                                id="yarrboard_framework_version"></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Yarrboard Client</th>
+                                                        <td class="text-end">
+                                                            <a href="https://github.com/hoeken/yarrboard-client"
+                                                                id="yarrboard_client_version"></a>
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Git Hash</th>
@@ -242,46 +247,70 @@
                                         <th scope="row">Fan RPMs</th>
                                         <td id="fan_rpm" class="text-end"></td>
                                     </tr>
-                                    <tr onclick="$('#message_stats').toggle()">
+                                    <tr onclick="$('#loop_speed').toggle()">
                                         <th scope="row">Loop Speed</th>
                                         <td id="fps" class="text-end"></td>
                                     </tr>
+                                    <tr id="loop_speed" style="display: none">
+                                        <td colspan="2">
+                                            <div class="row justify-content-end">
+                                                <div class="col col-lg-6">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <th>Controller</th>
+                                                            <th class="text-end">Average Time</th>
+                                                        </thead>
+                                                        <tbody id="loop_stats_container">
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr onclick="$('#message_stats').toggle()">
+                                        <th scope="row">Messages</th>
+                                        <td id="sent_message_total_main" class="text-end"></td>
+                                    </tr>
                                     <tr id="message_stats" style="display: none">
-                                        <td colspan="2" align="right">
-                                            <table class="table ministats">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>Message RX Rate</th>
-                                                        <td id="received_message_mps" class="text-end"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Message TX Rate</th>
-                                                        <td id="sent_message_mps" class="text-end"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Message RX Total</th>
-                                                        <td id="received_message_total" class="text-end">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Message TX Total</th>
-                                                        <td id="sent_message_total" class="text-end"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Websocket Clients</th>
-                                                        <td id="websocket_client_count" class="text-end">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>HTTP Clients</th>
-                                                        <td id="http_client_count" class="text-end"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Total Clients</th>
-                                                        <td id="total_client_count" class="text-end"></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                        <td colspan="2">
+                                            <div class="row justify-content-end">
+                                                <div class="col col-lg-6">
+                                                    <table class="table">
+                                                        <tbody>
+                                                            <tr>
+                                                                <th>Message RX Rate</th>
+                                                                <td id="received_message_mps" class="text-end"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Message TX Rate</th>
+                                                                <td id="sent_message_mps" class="text-end"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Message RX Total</th>
+                                                                <td id="received_message_total" class="text-end">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Message TX Total</th>
+                                                                <td id="sent_message_total" class="text-end"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Websocket Clients</th>
+                                                                <td id="websocket_client_count" class="text-end">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>HTTP Clients</th>
+                                                                <td id="http_client_count" class="text-end"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Total Clients</th>
+                                                                <td id="total_client_count" class="text-end"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr onclick="$('#memory_stats').toggle()">
@@ -296,7 +325,7 @@
                                     </tr>
                                     <tr id="memory_stats" style="display: none">
                                         <td colspan="2" align="right">
-                                            <table class="table ministats">
+                                            <table class="table">
                                                 <tr>
                                                     <th scope="row">Heap Size</th>
                                                     <td id="heap_size" class="text-end"></td>

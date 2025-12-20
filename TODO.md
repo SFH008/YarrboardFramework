@@ -1,11 +1,13 @@
 ## v1.0.0 Release
 
-* add a board url -> eg. github.com/brineomatic-rev-b
-* add a project url -> eg. brineomatic.com
+* pull in latest html / js from yb-firmware
 
 * create a README describing the project
 
 ## Long Term
+
+* add a http server item to the stats sidebar (or possibly comms / protocol?)
+  * move clients / messages / etc to that.
 
 * modify the gulp.js script to pull from the framework lib directory
   * it should also write the files to the framework lib directory for inclusion

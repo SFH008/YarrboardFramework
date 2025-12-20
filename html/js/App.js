@@ -1134,6 +1134,7 @@
       $("#hardware_version").html(msg.hardware_version);
       $("#esp_idf_version").html(`${msg.esp_idf_version}`);
       $("#arduino_version").html(`v${msg.arduino_version}`);
+      $("#yarrboard_framework_version").html(`v${msg.yarrboard_framework_version}`);
       $("#psychic_http_version").html(`v${msg.psychic_http_version}`);
       $("#yarrboard_client_version").html(`v${YarrboardClient.version}`);
 
@@ -1144,72 +1145,6 @@
         $("#last_reboot_reason").parent().hide();
 
       YB.ChannelRegistry.loadAllChannels(msg);
-
-      //populate our adc control table
-      $('#adcControlDiv').hide();
-      if (msg.adc) {
-        $('#adcTableBody').html("");
-        for (ch of msg.adc) {
-          if (ch.enabled)
-            $('#adcTableBody').append(ADCControlRow(ch.id, ch.name, ch.type));
-        }
-
-        $('#adcControlDiv').show();
-
-        //start our update poller.
-        if (YB.App.currentPage == 'config')
-          YB.App.startUpdateData();
-      }
-
-      //only do it as needed
-      if (!YB.App.pageReady.config || YB.App.currentPage != "config") {
-
-        //edit controls for each adc
-        $('#adcConfig').hide();
-        if (msg.adc) {
-          $('#adcConfigForm').html("");
-          for (ch of msg.adc) {
-            $('#adcConfigForm').append(ADCEditCard(ch));
-            $(`#fADCEnabled${ch.id}`).prop("checked", ch.enabled);
-            $(`#fADCType${ch.id}`).val(ch.type);
-            $(`#fADCDisplayDecimals${ch.id}`).val(ch.displayDecimals);
-            $(`#fADCUseCalibrationTable${ch.id}`).prop("checked", ch.useCalibrationTable);
-            if (ch.useCalibrationTable)
-              $(`#fADCCalibrationTableUI${ch.id}`).show();
-            else
-              $(`#fADCCalibrationTableUI${ch.id}`).hide();
-
-            //enable/disable other stuff.
-            $(`#fADCName${ch.id}`).prop('disabled', !ch.enabled);
-            $(`#fADCType${ch.id}`).prop('disabled', !ch.enabled);
-            $(`#fADCDisplayDecimals${ch.id}`).prop('disabled', !ch.enabled);
-            $(`#fADCUseCalibrationTable${ch.id}`).prop('disabled', !ch.enabled);
-
-            //validate + save
-            $(`#fADCEnabled${ch.id}`).change(validate_adc_enabled);
-            $(`#fADCName${ch.id}`).change(validate_adc_name);
-            $(`#fADCType${ch.id}`).change(validate_adc_type);
-            $(`#fADCDisplayDecimals${ch.id}`).change(validate_adc_display_decimals);
-            $(`#fADCUseCalibrationTable${ch.id}`).change(validate_adc_use_calibration_table);
-            $(`#fADCCalibratedUnits${ch.id}`).change(validate_adc_calibrated_units);
-
-            //calibration table stuff.
-            $(`#fADCAverageOutputCopy${ch.id}`).click(adc_calibration_average_copy);
-            $(`#fADCAverageOutputReset${ch.id}`).click(adc_calibration_average_reset);
-            $(`#fADCCalibrationTableAdd${ch.id}`).click(validate_adc_add_calibration);
-            if (YB.App.config.adc[ch.id - 1].hasOwnProperty("calibrationTable")) {
-              YB.App.config.adc[ch.id - 1].calibrationTable.map(([output, calibrated], index) => {
-                $(`#fADCCalibrationTableRemove${ch.id}_${index}`).click(validate_adc_remove_calibration);
-              });
-            }
-
-            //for our live averages on config page.
-            adc_running_averages[ch.id] = [];
-          }
-
-          $('#adcConfig').show();
-        }
-      }
 
       //did we get brightness?
       if (msg.brightness && !YB.App.currentlyPickingBrightness)
@@ -1266,98 +1201,6 @@
       // else
       //   $('#bus_voltage_main').hide();
 
-      //our adc info
-      if (msg.adc) {
-        for (ch of msg.adc) {
-          if (YB.App.config.adc[ch.id - 1].enabled) {
-
-            //load our defaults
-            let units = YB.App.config.adc[ch.id - 1].units;
-            let value = parseFloat(ch.value);
-            let calibrated_value = value;
-
-            // let adc_raw = Math.round(ch.adc_raw);
-            // let adc_voltage = ch.adc_voltage.toFixed(2);
-            // $("#adcRaw" + ch.id).html(adc_raw);
-            // $("#adcVoltage" + ch.id).html(adc_voltage + "V")
-            //let percentage = ch.percentage.toFixed(1);
-            // $(`#adcBar${ch.id} div`).css("width", percentage + "%");
-            // $(`#adcBar${ch.id}`).attr("aria-valuenow", percentage);
-
-            //are we using a calibration table?
-            if (YB.App.config.adc[ch.id - 1].useCalibrationTable) {
-              units = YB.App.config.adc[ch.id - 1].calibratedUnits;
-              calibrated_value = parseFloat(ch.calibrated_value);
-            }
-
-            //save it to our running average.
-            if (YB.App.currentPage == "config") {
-              //manage our sliding window
-              adc_running_averages[ch.id].push(value);
-              if (adc_running_averages[ch.id].length > 1000)
-                adc_running_averages[ch.id].shift();
-
-              //update our average
-              const average = adc_running_averages[ch.id].reduce((accumulator, currentValue) => accumulator + currentValue, 0) / adc_running_averages[ch.id].length;
-              $(`#fADCAverageOutput${ch.id}`).val(average.toFixed(4));
-              $(`#fADCAverageOutputCount${ch.id}`).html(`(${adc_running_averages[ch.id].length} points)`);
-            } else
-              adc_running_averages[ch.id] = [];
-
-            //how should we format our value?
-            if (YB.App.config.adc[ch.id - 1].displayDecimals >= 0) {
-              calibrated_value = YB.Util.formatNumber(calibrated_value, YB.App.config.adc[ch.id - 1].displayDecimals);
-            } else {
-              switch (YB.App.config.adc[ch.id - 1].type) {
-                case "thermistor":
-                  calibrated_value = YB.Util.formatNumber(calibrated_value, 1);
-                  break;
-                case "raw":
-                case "4-20ma":
-                case "high_volt_divider":
-                case "low_volt_divider":
-                  calibrated_value = YB.Util.formatNumber(calibrated_value, 2);
-                  break;
-                case "ten_k_pullup":
-                  calibrated_value = YB.Util.formatNumber(calibrated_value, 0);
-                  break;
-                default:
-                  calibrated_value = YB.Util.formatNumber(calibrated_value, 3);
-              }
-            }
-
-            //how should we display our value?
-            switch (YB.App.config.adc[ch.id - 1].type) {
-              case "digital_switch":
-                if (value)
-                  $("#adcValue" + ch.id).html(`HIGH`);
-                else
-                  $("#adcValue" + ch.id).html(`LOW`);
-                break;
-              case "4-20ma":
-                if (value == 0)
-                  $("#adcValue" + ch.id).html(`<span class="text-danger">ERROR: No Signal</span>`);
-                else if (value < 4.0)
-                  $("#adcValue" + ch.id).html(`<span class="text-danger">ERROR: ???</span>`);
-                else
-                  $("#adcValue" + ch.id).html(`${calibrated_value}${units}`);
-                break;
-              case "ten_k_pullup":
-                if (value == -2)
-                  $("#adcValue" + ch.id).html(`<span class="text-danger">Error: No Connection</span>`);
-                else if (value == -1)
-                  $("#adcValue" + ch.id).html(`<span class="text-danger">Error: Negative Voltage</span>`);
-                else
-                  $("#adcValue" + ch.id).html(`${calibrated_value}${units}`);
-                break;
-
-              default:
-                $("#adcValue" + ch.id).html(`${calibrated_value}${units}`);
-            }
-          }
-        }
-      }
-
       if (YB.App.isMFD()) {
         $(".mfdShow").show()
         $(".mfdHide").hide()
@@ -1383,11 +1226,32 @@
       if (msg.fps)
         $("#fps").html(msg.fps.toLocaleString("en-US") + " hz");
 
+      if (msg.loop_timer) {
+        let totalTime = 0;
+
+        const rows = $.map(msg.loop_timer, function (item) {
+          totalTime += item.usec;
+          return `<tr>
+                    <td>${item.name}</td>
+                    <td class="text-end">${item.usec} μs</td>
+                </tr>`;
+        });
+
+        const totalRow =
+          `<tr>
+            <th>Total</th>
+            <th class="text-end">${totalTime} μs</th>
+          </tr>`;
+
+        $('#loop_stats_container').html(rows.join('') + totalRow);
+      }
+
       //message info
       $("#received_message_mps").html(msg.received_message_mps.toLocaleString("en-US") + " mps");
       $("#received_message_total").html(msg.received_message_total.toLocaleString("en-US"));
       $("#sent_message_mps").html(msg.sent_message_mps.toLocaleString("en-US") + " mps");
       $("#sent_message_total").html(msg.sent_message_total.toLocaleString("en-US"));
+      $("#sent_message_total_main").html(msg.sent_message_total.toLocaleString("en-US"));
 
       //client info
       $("#total_client_count").html(msg.http_client_count + msg.websocket_client_count);

@@ -145,6 +145,9 @@ void ConfigManager::generateBoardConfig(JsonVariant output)
   output["uuid"] = uuid;
   output["firmware_version"] = _app.firmware_version;
   output["hardware_version"] = _app.hardware_version;
+  output["hardware_url"] = _app.hardware_url;
+  output["project_name"] = _app.project_name;
+  output["project_url"] = _app.project_url;
   output["esp_idf_version"] = esp_get_idf_version();
   output["arduino_version"] = ESP_ARDUINO_VERSION_STR;
   output["psychic_http_version"] = PSYCHIC_VERSION_STR;
