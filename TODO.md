@@ -1,7 +1,5 @@
 ## v1.0.0 Release
 
-* create a README describing the project
-
 ## Long Term
 
 * add a http server item to the stats sidebar (or possibly comms / protocol?)
