@@ -71,7 +71,7 @@ const PATHS = {
 };
 
 // Files to ignore when scanning for assets
-const IGNORE_FILES = ['index.html'];
+const IGNORE_FILES = ['index.html', "site.webmanifest", "ws", "api/endpoint", "api/config", "api/stats", "api/update", "coredump.bin"];
 
 console.log('PATHS configuration:');
 console.log(`  frameworkHtml: ${PATHS.frameworkHtml}`);
@@ -139,11 +139,13 @@ function findFiles(filterFn, ignoreList = []) {
                 const filename = basename(fullPath);
 
                 // Skip hidden files, ignored files, and files that don't match the filter
-                if (!filename.startsWith('.') && !ignoreList.includes(filename) && filterFn(filename)) {
+                if (!filename.startsWith('.') && !ignoreList.includes(relativePath) && filterFn(filename)) {
                     // Only add if not already found (project takes precedence over framework)
                     if (!files.some(f => f.file === relativePath)) {
                         files.push({ file: relativePath, source });
                     }
+                } else if (ignoreList.includes(relativePath)) {
+                    // console.log(`Ignoring file ${relativePath}`);
                 }
             }
         });
@@ -199,7 +201,7 @@ function findProjectAssets() {
     }
 
     if (assets.files.length) {
-        console.log(`Found ${assets.files.length} file(s):`);
+        console.log(`Found ${assets.files.length} gulpable file(s):`);
         assets.files.forEach(file => console.log(`  - ${file}`));
     }
 
@@ -250,7 +252,7 @@ function injectProjectAssets(htmlPath, assets) {
 
         // Insert before </head>
         html = html.replace('</head>', cssContent + '</head>');
-        console.log(`Injected ${assets.css.length} CSS file(s) into <head>`);
+        // console.log(`Injected ${assets.css.length} CSS file(s)`);
     }
 
     // Inject JS files before </body>
@@ -265,7 +267,7 @@ function injectProjectAssets(htmlPath, assets) {
 
         // Insert before </body>
         html = html.replace('</body>', jsContent + '</body>');
-        console.log(`Injected ${assets.js.length} JS file(s) before </body>`);
+        // console.log(`Injected ${assets.js.length} JS file(s)`);
     }
 
     // Write the modified HTML back
