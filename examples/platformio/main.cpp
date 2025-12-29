@@ -21,13 +21,8 @@ NavicoController navico(yba);
 
 void setup()
 {
-  yba.http.index_length = index_html_gz_len;
-  yba.http.index_sha = index_html_gz_sha;
-  yba.http.index_data = index_html_gz;
-
-  yba.http.logo_length = logo_png_gz_len;
-  yba.http.logo_sha = logo_png_gz_sha;
-  yba.http.logo_data = logo_png_gz;
+  yba.http.index = &index_html_gz;
+  yba.http.logo = &logo_png_gz;
 
   yba.board_name = "Framework Test";
   yba.default_hostname = "yarrboard";

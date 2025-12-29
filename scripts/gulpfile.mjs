@@ -32,7 +32,8 @@ import inlineImages from 'gulp-css-base64';
 import favicon from 'gulp-base64-favicon';
 import { readFileSync, createWriteStream, readdirSync, existsSync, mkdirSync, statSync } from 'fs';
 import { createHash } from 'crypto';
-import { join, basename, relative, dirname } from 'path';
+import { join, basename, relative, dirname, extname } from 'path';
+import { lookup as mimeLookup } from 'mime-types';
 
 // ============================================================================
 // Configuration
@@ -264,7 +265,7 @@ function injectProjectAssets(htmlPath, assets) {
     createWriteStream(htmlPath).end(html);
 }
 
-async function writeHeaderFile(source, destination, name) {
+async function writeHeaderFile(source, destination, name, originalFilename) {
     return new Promise((resolve, reject) => {
         try {
             const wstream = createWriteStream(destination);
@@ -274,9 +275,26 @@ async function writeHeaderFile(source, destination, name) {
             hashSum.update(data);
             const hex = hashSum.digest('hex');
 
-            wstream.write(`#define ${name}_len ${data.length}\n`);
-            wstream.write(`const char ${name}_sha[] = "${hex}";\n`);
-            wstream.write(`const uint8_t ${name}[] = {`);
+            // Determine MIME type from original filename (without .gz extension)
+            const mimeType = mimeLookup(originalFilename) || 'application/octet-stream';
+
+            // Write header guard and includes
+            const guardName = `GULPED_${name.toUpperCase()}_H`;
+            wstream.write(`#ifndef ${guardName}\n`);
+            wstream.write(`#define ${guardName}\n\n`);
+            wstream.write(`#include "GulpedFile.h"\n\n`);
+
+            // Write the filename
+            wstream.write(`const char _${name}_filename[] = "${originalFilename}";\n`);
+
+            // Write the MIME type
+            wstream.write(`const char _${name}_mimetype[] = "${mimeType}";\n`);
+
+            // Write the SHA256 hash
+            wstream.write(`const char _${name}_sha[] = "${hex}";\n`);
+
+            // Write the data array
+            wstream.write(`const uint8_t _${name}_data[] = {`);
 
             for (let i = 0; i < data.length; i++) {
                 if (i % 1000 === 0) wstream.write("\n");
@@ -284,7 +302,18 @@ async function writeHeaderFile(source, destination, name) {
                 if (i < data.length - 1) wstream.write(',');
             }
 
-            wstream.write('\n};');
+            wstream.write('\n};\n\n');
+
+            // Write the GulpedFile struct
+            wstream.write(`const GulpedFile ${name} = {\n`);
+            wstream.write(`    _${name}_data,\n`);
+            wstream.write(`    ${data.length},\n`);
+            wstream.write(`    _${name}_sha,\n`);
+            wstream.write(`    _${name}_filename,\n`);
+            wstream.write(`    _${name}_mimetype\n`);
+            wstream.write(`};\n\n`);
+
+            wstream.write(`#endif // ${guardName}`);
             wstream.end();
 
             wstream.on('finish', async () => {
@@ -335,7 +364,7 @@ function minifyAndCompress() {
 async function embedHtml() {
     const source = join(PATHS.dist, 'index.html.gz');
     const destination = join(PATHS.src, 'index.html.gz.h');
-    await writeHeaderFile(source, destination, 'index_html_gz');
+    await writeHeaderFile(source, destination, 'index_html_gz', 'index.html');
 }
 
 function compressFile(filename) {
@@ -369,7 +398,7 @@ async function embedFile(filename) {
         mkdirSync(destDir, { recursive: true });
     }
 
-    await writeHeaderFile(source, destination, safeName);
+    await writeHeaderFile(source, destination, safeName, filename);
 }
 
 function createFileTask(filename) {

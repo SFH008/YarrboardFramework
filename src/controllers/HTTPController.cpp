@@ -58,7 +58,7 @@ bool HTTPController::setup()
     if (request->header("If-Modified-Since").indexOf(last_modified) > 0)
       return response->send(304);
     // What about our ETag?
-    else if (request->header("If-None-Match").equals(index_sha))
+    else if (request->header("If-None-Match").equals(index->sha256))
       return response->send(304);
     else {
       response->setCode(200);
@@ -70,10 +70,10 @@ bool HTTPController::setup()
       // And set the last-modified datetime so we can check if we need to send
       // it again next time or not
       response->addHeader("Last-Modified", last_modified);
-      response->addHeader("ETag", index_sha);
+      response->addHeader("ETag", index->sha256);
 
       // add our actual content
-      response->setContent(index_data, index_length);
+      response->setContent(index->data, index->length);
 
       return response->send();
     }
@@ -84,8 +84,8 @@ bool HTTPController::setup()
     response->setContentType("image/png");
     response->addHeader("Content-Encoding", "gzip");
     response->addHeader("Last-Modified", last_modified);
-    response->addHeader("ETag", logo_sha);
-    response->setContent(logo_data, logo_length);
+    response->addHeader("ETag", logo->sha256);
+    response->setContent(logo->data, logo->length);
     return response->send();
   });
 

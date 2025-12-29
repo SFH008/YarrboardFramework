@@ -23,6 +23,7 @@
     "gulp-uglify": "^3.0.2",
     "gulp-uglify-es": "^3.0.0",
     "loadtest": "^8.0.5",
+    "mime-types": "^3.0.2",
     "yarrboard-client": "^1.2.1"
   }
 }

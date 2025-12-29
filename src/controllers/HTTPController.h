@@ -15,6 +15,7 @@
 
 #include "YarrboardConfig.h"
 
+#include "GulpedFile.h"
 #include "controllers/AuthController.h"
 #include "controllers/BaseController.h"
 #include <Arduino.h>
@@ -42,13 +43,8 @@ class HTTPController : public BaseController
 
     void sendToAllWebsockets(const char* jsonString, UserRole auth_level);
 
-    uint32_t index_length = 0;
-    const char* index_sha;
-    const uint8_t* index_data;
-
-    uint32_t logo_length = 0;
-    const char* logo_sha;
-    const uint8_t* logo_data;
+    const GulpedFile* index = nullptr;
+    const GulpedFile* logo = nullptr;
 
     unsigned int websocketClientCount = 0;
     unsigned int httpClientCount = 0;
