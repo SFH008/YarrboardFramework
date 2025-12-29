@@ -48,20 +48,30 @@ if (!FRAMEWORK_PATH) {
     process.exit(1);
 }
 
+// Get the project path - defaults to current directory if not set
+// This is where project-specific assets (html/, src/, etc.) are located
+const PROJECT_PATH = process.env.YARRBOARD_PROJECT_PATH || '.';
+
 console.log(`Using YarrboardFramework from: ${FRAMEWORK_PATH}`);
+console.log(`Using project path: ${PROJECT_PATH}`);
 
 const PATHS = {
     frameworkHtml: join(FRAMEWORK_PATH, 'html'),  // Framework HTML/CSS/JS
-    projectHtml: 'html',                           // Project-specific assets (logos)
-    dist: 'dist',
-    src: 'src/gulp'
+    projectHtml: join(PROJECT_PATH, 'html'),      // Project-specific assets (logos)
+    dist: join(PROJECT_PATH, 'dist'),             // Output directory
+    src: join(PROJECT_PATH, 'src/gulp')           // Generated headers directory
 };
 
+// const LOGOS = [
+//     'logo-sendit.png',
+//     'logo-brineomatic.png',
+//     'logo-frothfet.png'
+// ];
+
 const LOGOS = [
-    'logo-sendit.png',
-    'logo-brineomatic.png',
-    'logo-frothfet.png'
+    'logo.png',
 ];
+
 
 const HTML_MIN_OPTIONS = {
     removeComments: true,

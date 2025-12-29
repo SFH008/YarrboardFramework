@@ -6,12 +6,6 @@ Import("env")
 #print("Packaging yarrboard-client from NPM")
 #env.Execute("browserify html/stub.js > html/yarrboard-client.js")
 
-# Ensure the output directory exists
-gulp_folder = "src/gulp"
-if not os.path.exists(gulp_folder):
-    print(f"Creating missing directory: {gulp_folder}")
-    os.makedirs(gulp_folder)
-
 # Find the YarrboardFramework library path
 # PlatformIO installs dependencies in .pio/libdeps/[environment_name]/
 framework_path = None
@@ -93,6 +87,27 @@ if not framework_path:
 # Set the environment variable for the gulpfile
 os.environ["YARRBOARD_FRAMEWORK_PATH"] = framework_path
 
+# Set the project path - this is where project-specific assets live (html/, src/, etc.)
+# Use PROJECT_SRC_DIR from PlatformIO to get the actual source directory
+# This correctly handles when src_dir is set to examples/platformio or other custom paths
+try:
+    project_src_dir = env["PROJECT_SRC_DIR"]
+    project_path = project_src_dir
+    print(f"Using PROJECT_SRC_DIR from PlatformIO: {project_path}")
+except KeyError:
+    # Fallback to current working directory if PROJECT_SRC_DIR is not available
+    project_path = os.getcwd()
+    print(f"PROJECT_SRC_DIR not available, using current directory: {project_path}")
+
+os.environ["YARRBOARD_PROJECT_PATH"] = project_path
+
+# Ensure the output directory exists
+gulp_folder = f"{project_path}/src/gulp"
+if not os.path.exists(gulp_folder):
+    print(f"Creating missing directory: {gulp_folder}")
+    os.makedirs(gulp_folder)
+
+print(f"Project path: {project_path}")
 print("Compressing web app into header")
 result = env.Execute(f"gulp --gulpfile {framework_path}/scripts/gulpfile.mjs --cwd .")
 if result != 0:
