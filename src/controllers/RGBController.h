@@ -27,6 +27,8 @@ class RGBControllerInterface : public BaseController
   public:
     RGBControllerInterface(YarrboardApp& app, const char* name) : BaseController(app, name) {}
 
+    uint8_t maxBrightness = 50;
+
     virtual void setStatusColor(uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void setStatusColor(const CRGB& color) = 0;
     virtual void setPixelColor(uint8_t c, uint8_t r, uint8_t g, uint8_t b) = 0;
@@ -43,7 +45,6 @@ class RGBController : public RGBControllerInterface
       _leds = new CRGB[_numLeds];
 
       FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(_leds, _numLeds);
-      FastLED.setBrightness(32);
       FastLED.clear();
       setStatusColor(CRGB::Blue);
       FastLED.show();
@@ -63,7 +64,8 @@ class RGBController : public RGBControllerInterface
     void loop() override
     {
       // 10hz refresh
-      if (millis() - lastRGBUpdateMillis > 100) {
+      if (millis() - lastRGBUpdateMillis > 1000) {
+        FastLED.setBrightness(maxBrightness * _cfg.globalBrightness);
         FastLED.show();
         lastRGBUpdateMillis = millis();
       }
@@ -79,6 +81,7 @@ class RGBController : public RGBControllerInterface
         return;
 
       _leds[c].setRGB(r, g, b);
+      FastLED.setBrightness(maxBrightness * _cfg.globalBrightness);
 
       if (millis() - lastRGBUpdateMillis > 100) {
         FastLED.show();
@@ -93,6 +96,7 @@ class RGBController : public RGBControllerInterface
         return;
 
       _leds[c] = color;
+      FastLED.setBrightness(maxBrightness * _cfg.globalBrightness);
 
       if (millis() - lastRGBUpdateMillis > 100) {
         FastLED.show();

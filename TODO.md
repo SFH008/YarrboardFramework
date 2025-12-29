@@ -1,9 +1,5 @@
 ## v1.1
 
-* global brightness
-  * rgb controller -> setMaxBrightness()
-  * onBrightness -> max * brightness
-
 * we need to add an order field to controllers or registerController() that determines how the setup / loop order.
   * sort on add
   * mqtt needs to be last
