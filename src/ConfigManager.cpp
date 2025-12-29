@@ -176,6 +176,7 @@ void ConfigManager::generateBoardConfig(JsonVariant output)
 void ConfigManager::generateAppConfig(JsonVariant output)
 {
   // our identifying info
+  output["is_first_boot"] = is_first_boot;
   output["startup_melody"] = startup_melody;
   output["default_role"] = _app.auth.getRoleText(app_default_role);
   output["admin_user"] = admin_user;
@@ -273,9 +274,6 @@ bool ConfigManager::loadConfigFromFile(const char* file, char* error, size_t len
     return false;
   }
 
-  // if we have an existing config file, no need for first round stuff.
-  is_first_boot = false;
-
   return loadConfigFromJSON(doc, error, len);
 }
 
@@ -336,6 +334,9 @@ bool ConfigManager::loadNetworkConfigFromJSON(JsonVariant config, char* error, s
 bool ConfigManager::loadAppConfigFromJSON(JsonVariant config, char* error, size_t len)
 {
   const char* v;
+
+  // determines if we do our improv loop or not.
+  is_first_boot = config["is_first_boot"] | false;
 
   // startup_melody
   v = config["startup_melody"] | _app.default_melody;
