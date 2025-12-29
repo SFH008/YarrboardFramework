@@ -2,6 +2,8 @@
 
 * find a way to provide html/css/js/etc files as part of library framework included.
   * create a meta-include with #includes for each gulped file
+  * remove oshw-pixel file
+  * split css between framework and project
 
 * is_first_boot / improvwifi
   * if yarrboard.json is found -> also check config.is_first_boot so its possible to bundle a default json
