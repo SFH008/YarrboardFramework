@@ -43,20 +43,7 @@ try:
         # Final fallback: Check if we're running inside the YarrboardFramework repository itself
         # This happens when building examples within the framework repo
         project_dir = os.getcwd()
-        parent_dir = os.path.dirname(project_dir)
-        grandparent_dir = os.path.dirname(parent_dir)
-
-        print(f"DEBUG: project_dir = {project_dir}")
-        print(f"DEBUG: parent_dir = {parent_dir}")
-        print(f"DEBUG: grandparent_dir = {grandparent_dir}")
-        print(f"DEBUG: os.path.basename(parent_dir) = {os.path.basename(parent_dir)}")
-        print(f"DEBUG: os.path.basename(project_dir) = {os.path.basename(project_dir)}")
-
-        # Check if we're in the YarrboardFramework repo root itself
-        # (scripts/gulpfile.mjs exists in current directory)
         gulpfile_in_current = os.path.join(project_dir, "scripts", "gulpfile.mjs")
-        print(f"DEBUG: Looking for gulpfile at: {gulpfile_in_current}")
-        print(f"DEBUG: Gulpfile exists? {os.path.isfile(gulpfile_in_current)}")
 
         if os.path.isfile(gulpfile_in_current):
             framework_path = project_dir
@@ -64,6 +51,10 @@ try:
         else:
             print("ERROR: Could not find YarrboardFramework library!")
             print(f"Searched for: {framework_dir} and {framework_link}")
+            print(f"DEBUG: project_dir = {project_dir}")
+            print(f"DEBUG: parent_dir = {os.path.dirname(project_dir)}")
+            print(f"DEBUG: grandparent_dir = {os.path.dirname(os.path.dirname(project_dir))}")
+            print(f"DEBUG: Looking for gulpfile at: {gulpfile_in_current}")
             print("Make sure the library is installed via platformio.ini")
             env.Exit(1)
 except KeyError:
@@ -100,12 +91,6 @@ except KeyError:
     print(f"PROJECT_SRC_DIR not available, using current directory: {project_path}")
 
 os.environ["YARRBOARD_PROJECT_PATH"] = project_path
-
-# Ensure the output directory exists
-gulp_folder = f"{project_path}/src/gulp"
-if not os.path.exists(gulp_folder):
-    print(f"Creating missing directory: {gulp_folder}")
-    os.makedirs(gulp_folder)
 
 print(f"Project path: {project_path}")
 print("Compressing web app into header")
