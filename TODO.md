@@ -1,5 +1,7 @@
 ## v1.1
 
+* bug with reconnecting (eg ESP.restart not going down the hello path)
+
 * login, hello, logout are special commands.  would be nice to have them use the same command registry
   * problem is we need certain context specific things (mode, connection id, and role)
   * currently we have a chance of collisions if http api + websockets requests happen simulataneously.

@@ -76,7 +76,7 @@ class StringPrint : public Print
     const char* c_str() const { return _buf; }
 
   private:
-    static constexpr size_t BUF_SIZE = 1024;
+    static constexpr size_t BUF_SIZE = 2048;
     char _buf[BUF_SIZE];
     size_t _pos;
 };
