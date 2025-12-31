@@ -8,6 +8,13 @@
     config: {},
 
     messageHandlers: {},
+    pageOpenHandlers: {},
+
+    onPageOpen: function (page, handler) {
+      if (!YB.App.pageOpenHandlers[page])
+        YB.App.pageOpenHandlers[page] = [];
+      YB.App.pageOpenHandlers[page].push(handler);
+    },
 
     addMessageHandler: function (message, handler) {
       if (!YB.App.messageHandlers[message])
@@ -225,6 +232,14 @@
         //update our nav - remove active from all nav links first
         $('.navbar-nav .nav-link').removeClass("active");
         $(`#${page}Nav a`).addClass("active");
+
+        //call our onPageOpen handlers
+        const handlers = YB.App.pageOpenHandlers[YB.App.currentPage];
+        if (handlers) {
+          for (let handler of handlers) {
+            handler();
+          }
+        }
 
         //is our new page ready?
         YB.App.onPageReady();

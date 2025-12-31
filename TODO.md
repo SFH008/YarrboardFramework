@@ -1,8 +1,7 @@
 ## v2.0
 
 * more App.js functions:
-  * addPage("page", "content", openCallback);
-  * onOpenPage(page, callback);
+  * addPage("page", "content");
 
 ## Long Term
 
