@@ -47,7 +47,6 @@ bool ProtocolController::setup()
   registerCommand(ADMIN, "set_misc_config", this, &ProtocolController::handleSetMiscellaneousConfig);
   registerCommand(ADMIN, "restart", this, &ProtocolController::handleRestart);
   registerCommand(ADMIN, "factory_reset", this, &ProtocolController::handleFactoryReset);
-  registerCommand(ADMIN, "ota_start", this, &ProtocolController::handleOTAStart);
 
   return true;
 }
@@ -634,14 +633,6 @@ void ProtocolController::handleFactoryReset(JsonVariantConst input, JsonVariant 
   ESP.restart();
 }
 
-void ProtocolController::handleOTAStart(JsonVariantConst input, JsonVariant output, ProtocolContext context)
-{
-  if (_app.ota.checkOTA())
-    _app.ota.startOTA();
-  else
-    return generateErrorJSON(output, "Firmware already up to date.");
-}
-
 void ProtocolController::handleSetTheme(JsonVariantConst input, JsonVariant output, ProtocolContext context)
 {
   if (!input["theme"].is<String>())
@@ -759,23 +750,6 @@ void ProtocolController::sendFastUpdate()
   for (const auto& entry : _app.getControllers()) {
     entry.controller->generateFastUpdateHook(output);
   }
-
-  sendToAll(output, GUEST);
-}
-
-void ProtocolController::sendOTAProgressUpdate(float progress)
-{
-  JsonDocument output;
-  output["msg"] = "ota_progress";
-  output["progress"] = round2(progress);
-
-  sendToAll(output, GUEST);
-}
-
-void ProtocolController::sendOTAProgressFinished()
-{
-  JsonDocument output;
-  output["msg"] = "ota_finished";
 
   sendToAll(output, GUEST);
 }

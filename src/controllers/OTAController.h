@@ -14,6 +14,7 @@
 #define YARR_OTA_H
 
 #include "controllers/BaseController.h"
+#include "controllers/ProtocolController.h"
 #include "utility.h"
 #include <ArduinoOTA.h>
 
@@ -60,6 +61,10 @@ class OTAController : public BaseController
     void _progressCallback(size_t progress, size_t size);
     void _updateEndCallback(int partition);
     void _updateCheckFailCallback(int partition, int error_code);
+
+    void handleOTAStart(JsonVariantConst input, JsonVariant output, ProtocolContext context);
+    void sendOTAProgressUpdate(float progress);
+    void sendOTAProgressFinished();
 };
 
 #endif /* !YARR_OTA_H */

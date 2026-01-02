@@ -74,8 +74,6 @@ class ProtocolController : public BaseController
     void sendBrightnessUpdate();
     void sendThemeUpdate();
     void sendFastUpdate();
-    void sendOTAProgressUpdate(float progress);
-    void sendOTAProgressFinished();
     void sendDebug(const char* message);
     void sendToAll(JsonVariantConst output, UserRole auth_level);
     void sendToAll(const char* jsonString, UserRole auth_level);
@@ -136,7 +134,6 @@ class ProtocolController : public BaseController
     void handleRestart(JsonVariantConst input, JsonVariant output, ProtocolContext context);
     void handleCrashMe(JsonVariantConst input, JsonVariant output, ProtocolContext context);
     void handleFactoryReset(JsonVariantConst input, JsonVariant output, ProtocolContext context);
-    void handleOTAStart(JsonVariantConst input, JsonVariant output, ProtocolContext context);
     void handleSetTheme(JsonVariantConst input, JsonVariant output, ProtocolContext context);
     void handleSetBrightness(JsonVariantConst input, JsonVariant output, ProtocolContext context);
 

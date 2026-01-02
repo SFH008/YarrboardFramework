@@ -14,17 +14,17 @@
 #include "ConfigManager.h"
 #include "YarrboardApp.h"
 #include "YarrboardDebug.h"
-#include "controllers/ProtocolController.h"
 
 OTAController* OTAController::_instance = nullptr;
 
 OTAController::OTAController(YarrboardApp& app) : BaseController(app, "ota")
 {
-  MyPubKey = new CryptoMemAsset("RSA Key", public_key, strlen(public_key) + 1);
 }
 
 bool OTAController::setup()
 {
+  _app.protocol.registerCommand(ADMIN, "ota_start", this, &OTAController::handleOTAStart);
+
   if (_cfg.app_enable_ota) {
     ArduinoOTA.setHostname(_cfg.local_hostname);
     ArduinoOTA.setPort(3232);
@@ -35,15 +35,16 @@ bool OTAController::setup()
   FOTA = new esp32FOTA(_app.hardware_version, _app.firmware_version, validate_firmware);
 
   if (!strlen(firmware_manifest_url)) {
-    YBP.println("No ota.firmware_manifest_url set, disabling OTA firmware downloading.");
+    YBP.println("⚠️ No ota.firmware_manifest_url set, disabling OTA firmware downloading.");
     return false;
   }
 
   FOTA->setManifestURL(firmware_manifest_url);
 
-  if (strlen(public_key))
+  if (strlen(public_key)) {
+    MyPubKey = new CryptoMemAsset("RSA Key", public_key, strlen(public_key) + 1);
     FOTA->setPubKey(MyPubKey);
-  else
+  } else
     YBP.println("⚠️ No ota.public_key set, will not check firmware signature.");
 
   FOTA->useBundledCerts();
@@ -57,16 +58,22 @@ bool OTAController::setup()
 
 void OTAController::loop()
 {
-  if (strlen(firmware_manifest_url)) {
-    if (doOTAUpdate) {
-      FOTA->handle();
-      doOTAUpdate = false;
-    }
+  if (doOTAUpdate) {
+    FOTA->handle();
+    doOTAUpdate = false;
   }
 
   if (_cfg.app_enable_ota) {
     ArduinoOTA.handle();
   }
+}
+
+void OTAController::handleOTAStart(JsonVariantConst input, JsonVariant output, ProtocolContext context)
+{
+  if (_app.ota.checkOTA())
+    _app.ota.startOTA();
+  else
+    return _app.protocol.generateErrorJSON(output, "Firmware already up to date.");
 }
 
 void OTAController::end()
@@ -84,6 +91,7 @@ bool OTAController::checkOTA()
 
 void OTAController::startOTA()
 {
+  YBP.printf("Starting OTA.");
   doOTAUpdate = true;
 }
 
@@ -101,7 +109,7 @@ void OTAController::_progressCallback(size_t progress, size_t size)
   // let the clients know every second and at the end
   if (millis() - ota_last_message > 1000 || progress == size) {
     float percent = (float)progress / (float)size * 100.0;
-    _app.protocol.sendOTAProgressUpdate(percent);
+    sendOTAProgressUpdate(percent);
     ota_last_message = millis();
   }
 }
@@ -109,7 +117,7 @@ void OTAController::_progressCallback(size_t progress, size_t size)
 void OTAController::_updateEndCallback(int partition)
 {
   YBP.printf("[ota] Update ended with %s partition\n", partition == U_SPIFFS ? "spiffs" : "firmware");
-  _app.protocol.sendOTAProgressFinished();
+  sendOTAProgressFinished();
 }
 
 void OTAController::_updateCheckFailCallback(int partition, int error_code)
@@ -142,4 +150,21 @@ void OTAController::_updateCheckFailCallbackStatic(int partition, int error_code
 {
   if (_instance)
     _instance->_updateCheckFailCallback(partition, error_code);
+}
+
+void OTAController::sendOTAProgressUpdate(float progress)
+{
+  JsonDocument output;
+  output["msg"] = "ota_progress";
+  output["progress"] = round2(progress);
+
+  _app.protocol.sendToAll(output, GUEST);
+}
+
+void OTAController::sendOTAProgressFinished()
+{
+  JsonDocument output;
+  output["msg"] = "ota_finished";
+
+  _app.protocol.sendToAll(output, GUEST);
 }
