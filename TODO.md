@@ -1,9 +1,13 @@
 ## v2.0
 
-* fix error with no piezo buzzer
-* get firmware release working
+* add buzzer and rgb to the example
+* setup firmware release scripts
 
 ## Long Term
+
+* get espwebtools integrated for first firmware upload
+  * modify release script to add firmwares to the release script.
+  * keep all previous firmwares for rollback potential
 
 * other app.* callbacks to register various things?
 
