@@ -1,6 +1,6 @@
 ## v2.0
 
-* 
+* fix error with no piezo buzzer
 * get firmware release working
 
 ## Long Term

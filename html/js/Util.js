@@ -285,6 +285,11 @@
             });
           }
         });
+      } else {
+        $("<option>")
+          .val("NONE")
+          .text(YB.Util.humanizeText("NONE"))
+          .appendTo(select);
       }
     },
   };

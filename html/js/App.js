@@ -414,19 +414,25 @@
     },
 
     getGeneralSettingsSchema: function () {
-      return {
+      const schema = {
         board_name: {
           presence: { allowEmpty: false },
           length: { maximum: 31 },
-        },
-        startup_melody: {
-          presence: { allowEmpty: false },
+        }
+      };
+
+      // Only add startup_melody validation if melodies config exists
+      if (YB.App.config.melodies) {
+        schema.startup_melody = {
+          presence: { allowEmpty: true },
           inclusion: {
             within: YB.App.config.melodies,
             message: "^Invalid melody selection"
           }
-        }
-      };
+        };
+      }
+
+      return schema;
     },
 
     getAuthenticationSettingsSchema: function () {
@@ -1363,7 +1369,10 @@
         YB.App.updateInterval = msg.app_update_interval;
 
       //for our melodies
-      $('#startup_melody').val(msg.startup_melody);
+      if (YB.App.config.melodies)
+        $('#startup_melody').val(msg.startup_melody);
+      else
+        $("#startup_melody").parent().hide();
 
       //YB.log(msg);
       $("#admin_user").val(msg.admin_user);
