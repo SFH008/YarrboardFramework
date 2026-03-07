@@ -122,9 +122,12 @@ void BaseChannel::mqttUpdate(MQTTController* mqtt)
 
 void BaseChannel::haGenerateDiscovery(JsonVariant doc, const char* uuid, MQTTController* mqtt)
 {
+  // how to structure our id?
+  sprintf(ha_key, "%s", mqtt->getBoardKey());
+
   // generate our id / topics
   sprintf(ha_uuid, "%s_%s_%s", uuid, channel_type, this->key);
-  sprintf(ha_topic_avail, "yarrboard/%s/%s/%s/ha_availability", uuid, channel_type, this->key);
+  sprintf(ha_topic_avail, "yarrboard/%s/%s/%s/ha_availability", ha_key, channel_type, this->key);
 }
 
 void BaseChannel::haPublishAvailable(MQTTController* mqtt)

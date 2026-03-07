@@ -294,6 +294,14 @@ void MQTTController::_onErrorStatic(esp_mqtt_error_codes_t error)
   }
 }
 
+const char* MQTTController::getBoardKey()
+{
+  if (_cfg.app_use_hostname_as_mqtt_uuid)
+    return _cfg.local_hostname;
+  else
+    return _cfg.uuid;
+}
+
 void MQTTController::haDiscovery()
 {
   if (!mqttClient.connected())
@@ -301,10 +309,7 @@ void MQTTController::haDiscovery()
 
   // how to structure our id?
   char ha_dev_uuid[128];
-  if (_cfg.app_use_hostname_as_mqtt_uuid)
-    sprintf(ha_dev_uuid, "yarrboard_%s", _cfg.local_hostname);
-  else
-    sprintf(ha_dev_uuid, "yarrboard_%s", _cfg.uuid);
+  sprintf(ha_dev_uuid, "yarrboard_%s", getBoardKey());
 
   char topic[128];
   sprintf(topic, "homeassistant/device/%s/config", ha_dev_uuid);

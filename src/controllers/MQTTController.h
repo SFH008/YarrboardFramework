@@ -34,6 +34,8 @@ class MQTTController : public BaseController
     void disconnect();
     bool isConnected();
 
+    const char* getBoardKey();
+
     void onTopic(const char* topic, int qos, OnMessageUserCallback callback);
     void publish(const char* topic, const char* payload, bool use_prefix = true);
     void traverseJSON(JsonVariant node, const char* topic_prefix);

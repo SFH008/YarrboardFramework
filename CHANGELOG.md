@@ -1,3 +1,7 @@
+# v2.4.0
+
+- Added `MQTTController.getBoardKey()` for getting uuid vs hostname to fix HomeAssistant integration
+
 # v2.3.0
 
 - Added `get(i)` method to `RollingAverage` class for accessing samples by index
