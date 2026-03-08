@@ -278,7 +278,7 @@
 
     showAlert: function (message, type = 'danger') {
       //we only need one alert at a time.
-      $('#liveAlertPlaceholder').html(YB.App.AlertBox(message, type))
+      $('#liveAlertPlaceholder').append(YB.App.AlertBox(message, type))
 
       //make sure we can see it.
       $('html').animate({
@@ -290,7 +290,7 @@
 
     showAdminAlert: function (message, type = 'danger') {
       //we only need one alert at a time.
-      $('#adminAlertPlaceholder').html(YB.App.AlertBox(message, type))
+      $('#adminAlertPlaceholder').append(YB.App.AlertBox(message, type))
 
       //make sure we can see it.
       $('html').animate({
