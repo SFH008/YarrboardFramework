@@ -50,6 +50,7 @@ class BaseChannel
     char ha_uuid[64];
     char ha_topic_avail[128];
     const char* channel_type = "base";
+    bool _haCallbacksRegistered = false;
 };
 
 #endif /* !YARR_BASE_CHANNEL_H */

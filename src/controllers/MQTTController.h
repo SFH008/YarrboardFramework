@@ -47,6 +47,8 @@ class MQTTController : public BaseController
     PsychicMqttClient mqttClient;
     unsigned long previousMQTTMillis = 0;
     bool _firstConnection = true;
+    bool _pendingHaDiscovery = false;
+    bool _commandTopicRegistered = false;
 
     void haDiscovery();
     void receiveMessage(const char* topic, const char* payload, int retain, int qos, bool dup);

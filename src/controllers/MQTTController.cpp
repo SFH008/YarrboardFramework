@@ -43,10 +43,14 @@ bool MQTTController::setup()
   mqttClient.onError(_onErrorStatic);
 
   // home assistant connection discovery hook.
+  // NOTE: we set a flag here instead of calling haDiscovery() directly, because
+  // haDiscovery() calls mqtt->onTopic() which does push_back on _onMessageUserCallbacks.
+  // Calling push_back while PsychicMqttClient::_onMessage is iterating that same vector
+  // can trigger a reallocation, invalidating the iterator and causing a crash.
   if (_cfg.app_enable_ha_integration) {
     mqttClient.onTopic("homeassistant/status", 0, [&](const char* topic, const char* payload, int retain, int qos, bool dup) {
       if (!strcmp(payload, "online"))
-        haDiscovery();
+        _pendingHaDiscovery = true;
     });
   }
 
@@ -94,6 +98,13 @@ void MQTTController::loop()
 {
   if (!mqttClient.connected())
     return;
+
+  // deferred HA discovery: triggered by homeassistant/status callback but run
+  // here (outside _onMessage iteration) to avoid invalidating the callback vector.
+  if (_pendingHaDiscovery && _cfg.app_enable_ha_integration) {
+    _pendingHaDiscovery = false;
+    haDiscovery();
+  }
 
   // periodically update our mqtt / HomeAssistant status
   unsigned int messageDelta = millis() - previousMQTTMillis;
@@ -242,10 +253,14 @@ void MQTTController::onConnect(bool sessionPresent)
   if (_cfg.app_enable_ha_integration)
     haDiscovery();
 
-  // look for json messages on this path...
-  char mqtt_path[128];
-  sprintf(mqtt_path, "yarrboard/%s/command", _cfg.local_hostname);
-  mqttClient.onTopic(mqtt_path, 0, _receiveMessageStatic);
+  // Register the command topic once; PsychicMqttClient resubscribes automatically
+  // on reconnect so there is no need to add a duplicate entry every reconnect.
+  if (!_commandTopicRegistered) {
+    char mqtt_path[128];
+    sprintf(mqtt_path, "yarrboard/%s/command", _cfg.local_hostname);
+    mqttClient.onTopic(mqtt_path, 0, _receiveMessageStatic);
+    _commandTopicRegistered = true;
+  }
 }
 
 void MQTTController::_onConnectStatic(bool sessionPresent)
