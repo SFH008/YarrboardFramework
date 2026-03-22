@@ -142,7 +142,7 @@
           panel.setContent(`<div class="row">${editContent}</div>`);
           ``
           for (var channel_config of cfg[ctype]) {
-            let ch = this.channelFromConfig(channel_config, ctype);
+            let ch = this.getChannelById(channel_config.id, ctype);
             ch.setupEditUI();
           }
         }
