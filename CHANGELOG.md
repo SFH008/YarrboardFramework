@@ -1,6 +1,17 @@
 # v2.4.0
 
-- Added `MQTTController.getBoardKey()` for getting uuid vs hostname to fix HomeAssistant integration
+## Bug Fixes
+
+- Fixed stale cookies when password has changed and double submit of login when pressing Enter
+- Fixed double instantiation of channels
+- Fixed login field corner styling
+- Fixed warning with missing `ConfigManager` include
+- Fixed multiple callbacks being added in discovery callback
+- Fixed alerts being overwritten instead of appended
+
+## Improvements
+
+- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration
 
 # v2.3.0
 
