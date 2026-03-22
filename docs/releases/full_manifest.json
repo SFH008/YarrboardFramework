@@ -48,6 +48,12 @@
     "description": "Works on ESP32 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
+      {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.0.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.0-espwebtools/manifest.json",
@@ -66,6 +72,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-S2 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
       {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.4.0.bin",
@@ -86,6 +98,12 @@
     "description": "Works on ESP32-S3 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
+      {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.0.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.0-espwebtools/manifest.json",
@@ -104,6 +122,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-C3 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
       {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.4.0.bin",
@@ -124,6 +148,12 @@
     "description": "Works on ESP32-C5 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
+      {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.0.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.0-espwebtools/manifest.json",
@@ -142,6 +172,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-C6 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.4.1",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.4.1.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.4.1-espwebtools/manifest.json",
+        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+      },
       {
         "version": "2.4.0",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.4.0.bin",
