@@ -155,11 +155,10 @@
         }, 10);
       });
 
-      //enter triggers login form
-      $(document).on('keypress', function (e) {
-        if (e.which == 13)
-          if (YB.App.currentPage == "login")
-            YB.App.doLogin();
+      //the login form (handles both button click and enter key)
+      $("#loginForm").on('submit', function (e) {
+        e.preventDefault();
+        YB.App.doLogin();
       });
 
       //run our start callbacks - no contention on document.ready
@@ -1093,8 +1092,15 @@
     },
 
     handleStatusMessage: function (msg) {
-      if (msg.status == "error")
+      if (msg.status == "error") {
+        if (msg.message == "Wrong username/password.") {
+          Cookies.remove("username");
+          Cookies.remove("password");
+          YB.App.openPage("login");
+        }
+
         YB.App.showAlert(msg.message, "danger");
+      }
       else if (msg.status == "success")
         YB.App.showAlert(msg.message, "success");
       else
