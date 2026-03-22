@@ -13,12 +13,12 @@
 #ifndef YARR_RGB_H
 #define YARR_RGB_H
 
+#include "ConfigManager.h"
 #include "FastLED.h"
 #include "YarrboardConfig.h"
 #include "controllers/BaseController.h"
 
 class YarrboardApp;
-class ConfigManager;
 
 // This is the "Interface" your App will talk to.
 // It has NO template arguments.
