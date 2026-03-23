@@ -62,6 +62,9 @@ class BuzzerController : public BaseController
     bool isActive = false;
 
   private:
+    const Melody* _melodyTable = nullptr;
+    size_t _melodyCount = 0;
+
     void playMelody(const Note* seq, size_t len);
     void buzzerMute();
     void buzzerTone(uint16_t freqHz);

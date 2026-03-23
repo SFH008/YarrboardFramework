@@ -585,6 +585,38 @@ static const Note LULLABY[] = {
   {659, 1666},
 };
 
+static const Melody passiveMelodyTable[] = {
+  MELODY_ENTRY(STARTUP),
+  MELODY_ENTRY(STARTUP_2),
+  MELODY_ENTRY(STARTUP_3),
+  MELODY_ENTRY(SUCCESS),
+  MELODY_ENTRY(SUCCESS_2),
+  MELODY_ENTRY(SUCCESS_3),
+  MELODY_ENTRY(ERROR),
+  MELODY_ENTRY(ERROR_2),
+  MELODY_ENTRY(ERROR_3),
+  MELODY_ENTRY(WARNING),
+  MELODY_ENTRY(WARNING_2),
+  MELODY_ENTRY(WARNING_3),
+  MELODY_ENTRY(CHEERFUL),
+  MELODY_ENTRY(ADVENTURE),
+  MELODY_ENTRY(PLAYFUL),
+  MELODY_ENTRY(SHANTY),
+  MELODY_ENTRY(JINGLE),
+  MELODY_ENTRY(VICTORY),
+  MELODY_ENTRY(GOOFY),
+  MELODY_ENTRY(DUBSTEP),
+  MELODY_ENTRY(DUBSTEP_MELODIC),
+  MELODY_ENTRY(ODE_TO_JOY),
+  MELODY_ENTRY(MINUET_IN_G),
+  MELODY_ENTRY(NACHTMUSIK),
+  MELODY_ENTRY(MOUNTAIN_KING),
+  MELODY_ENTRY(SUGAR_PLUM),
+  MELODY_ENTRY(HALLELUJAH),
+  MELODY_ENTRY(LULLABY),
+};
+static const size_t passiveMelodyCount = sizeof(passiveMelodyTable) / sizeof(passiveMelodyTable[0]);
+
 // Example melody (3 beeps)
 static const Note ACTIVE_STARTUP[] = {
   {3000, 50},
@@ -621,41 +653,91 @@ static const Note ACTIVE_WARNING[] = {
   {3000, 120},
 };
 
-static const Melody melodyTable[] = {
-  MELODY_ENTRY(STARTUP),
-  MELODY_ENTRY(STARTUP_2),
-  MELODY_ENTRY(STARTUP_3),
-  MELODY_ENTRY(SUCCESS),
-  MELODY_ENTRY(SUCCESS_2),
-  MELODY_ENTRY(SUCCESS_3),
-  MELODY_ENTRY(ERROR),
-  MELODY_ENTRY(ERROR_2),
-  MELODY_ENTRY(ERROR_3),
-  MELODY_ENTRY(WARNING),
-  MELODY_ENTRY(WARNING_2),
-  MELODY_ENTRY(WARNING_3),
-  MELODY_ENTRY(CHEERFUL),
-  MELODY_ENTRY(ADVENTURE),
-  MELODY_ENTRY(PLAYFUL),
-  MELODY_ENTRY(SHANTY),
-  MELODY_ENTRY(JINGLE),
-  MELODY_ENTRY(VICTORY),
-  MELODY_ENTRY(GOOFY),
-  MELODY_ENTRY(DUBSTEP),
-  MELODY_ENTRY(DUBSTEP_MELODIC),
-  MELODY_ENTRY(ODE_TO_JOY),
-  MELODY_ENTRY(MINUET_IN_G),
-  MELODY_ENTRY(NACHTMUSIK),
-  MELODY_ENTRY(MOUNTAIN_KING),
-  MELODY_ENTRY(SUGAR_PLUM),
-  MELODY_ENTRY(HALLELUJAH),
-  MELODY_ENTRY(LULLABY),
+// Morse code helpers: dot = 80 ms tone / 80 ms gap, dash = 240 ms tone / 80 ms gap
+#define MDOT  {3000, 80}, {0, 80}
+#define MDASH {3000, 240}, {0, 80}
+
+static const Note MORSE_A[] = { MDOT, MDASH };                          // .-
+static const Note MORSE_B[] = { MDASH, MDOT, MDOT, MDOT };              // -...
+static const Note MORSE_C[] = { MDASH, MDOT, MDASH, MDOT };             // -.-.
+static const Note MORSE_D[] = { MDASH, MDOT, MDOT };                    // -..
+static const Note MORSE_E[] = { MDOT };                                  // .
+static const Note MORSE_F[] = { MDOT, MDOT, MDASH, MDOT };              // ..-.
+static const Note MORSE_G[] = { MDASH, MDASH, MDOT };                   // --.
+static const Note MORSE_H[] = { MDOT, MDOT, MDOT, MDOT };               // ....
+static const Note MORSE_I[] = { MDOT, MDOT };                            // ..
+static const Note MORSE_J[] = { MDOT, MDASH, MDASH, MDASH };            // .---
+static const Note MORSE_K[] = { MDASH, MDOT, MDASH };                   // -.-
+static const Note MORSE_L[] = { MDOT, MDASH, MDOT, MDOT };              // .-..
+static const Note MORSE_M[] = { MDASH, MDASH };                         // --
+static const Note MORSE_N[] = { MDASH, MDOT };                          // -.
+static const Note MORSE_O[] = { MDASH, MDASH, MDASH };                  // ---
+static const Note MORSE_P[] = { MDOT, MDASH, MDASH, MDOT };             // .--.
+static const Note MORSE_Q[] = { MDASH, MDASH, MDOT, MDASH };            // --.-
+static const Note MORSE_R[] = { MDOT, MDASH, MDOT };                    // .-.
+static const Note MORSE_S[] = { MDOT, MDOT, MDOT };                     // ...
+static const Note MORSE_T[] = { MDASH };                                 // -
+static const Note MORSE_U[] = { MDOT, MDOT, MDASH };                    // ..-
+static const Note MORSE_V[] = { MDOT, MDOT, MDOT, MDASH };              // ...-
+static const Note MORSE_W[] = { MDOT, MDASH, MDASH };                   // .--
+static const Note MORSE_X[] = { MDASH, MDOT, MDOT, MDASH };             // -..-
+static const Note MORSE_Y[] = { MDASH, MDOT, MDASH, MDASH };            // -.--
+static const Note MORSE_Z[] = { MDASH, MDASH, MDOT, MDOT };             // --..
+
+static const Note MORSE_0[] = { MDASH, MDASH, MDASH, MDASH, MDASH };            // -----
+static const Note MORSE_1[] = { MDOT, MDASH, MDASH, MDASH, MDASH };             // .----
+static const Note MORSE_2[] = { MDOT, MDOT, MDASH, MDASH, MDASH };              // ..---
+static const Note MORSE_3[] = { MDOT, MDOT, MDOT, MDASH, MDASH };               // ...--
+static const Note MORSE_4[] = { MDOT, MDOT, MDOT, MDOT, MDASH };                // ....-
+static const Note MORSE_5[] = { MDOT, MDOT, MDOT, MDOT, MDOT };                 // .....
+static const Note MORSE_6[] = { MDASH, MDOT, MDOT, MDOT, MDOT };                // -....
+static const Note MORSE_7[] = { MDASH, MDASH, MDOT, MDOT, MDOT };               // --...
+static const Note MORSE_8[] = { MDASH, MDASH, MDASH, MDOT, MDOT };              // ---..
+static const Note MORSE_9[] = { MDASH, MDASH, MDASH, MDASH, MDOT };             // ----.
+
+static const Melody activeMelodyTable[] = {
   MELODY_ENTRY(ACTIVE_STARTUP),
   MELODY_ENTRY(ACTIVE_SUCCESS),
   MELODY_ENTRY(ACTIVE_ERROR),
   MELODY_ENTRY(ACTIVE_WARNING),
+  MELODY_ENTRY(MORSE_A),
+  MELODY_ENTRY(MORSE_B),
+  MELODY_ENTRY(MORSE_C),
+  MELODY_ENTRY(MORSE_D),
+  MELODY_ENTRY(MORSE_E),
+  MELODY_ENTRY(MORSE_F),
+  MELODY_ENTRY(MORSE_G),
+  MELODY_ENTRY(MORSE_H),
+  MELODY_ENTRY(MORSE_I),
+  MELODY_ENTRY(MORSE_J),
+  MELODY_ENTRY(MORSE_K),
+  MELODY_ENTRY(MORSE_L),
+  MELODY_ENTRY(MORSE_M),
+  MELODY_ENTRY(MORSE_N),
+  MELODY_ENTRY(MORSE_O),
+  MELODY_ENTRY(MORSE_P),
+  MELODY_ENTRY(MORSE_Q),
+  MELODY_ENTRY(MORSE_R),
+  MELODY_ENTRY(MORSE_S),
+  MELODY_ENTRY(MORSE_T),
+  MELODY_ENTRY(MORSE_U),
+  MELODY_ENTRY(MORSE_V),
+  MELODY_ENTRY(MORSE_W),
+  MELODY_ENTRY(MORSE_X),
+  MELODY_ENTRY(MORSE_Y),
+  MELODY_ENTRY(MORSE_Z),
+  MELODY_ENTRY(MORSE_0),
+  MELODY_ENTRY(MORSE_1),
+  MELODY_ENTRY(MORSE_2),
+  MELODY_ENTRY(MORSE_3),
+  MELODY_ENTRY(MORSE_4),
+  MELODY_ENTRY(MORSE_5),
+  MELODY_ENTRY(MORSE_6),
+  MELODY_ENTRY(MORSE_7),
+  MELODY_ENTRY(MORSE_8),
+  MELODY_ENTRY(MORSE_9),
 };
-static const size_t melodyCount = sizeof(melodyTable) / sizeof(melodyTable[0]);
+static const size_t activeMelodyCount = sizeof(activeMelodyTable) / sizeof(activeMelodyTable[0]);
 
 BuzzerController::BuzzerController(YarrboardApp& app) : BaseController(app, "buzzer")
 {
@@ -672,9 +754,16 @@ bool BuzzerController::setup()
     if (!ledcAttach(buzzerPin, 1000, LEDC_RES_BITS)) {
       YBP.println("Error attaching buzzer to LEDC channel.");
       return false;
-    } else {
-      isActive = false;
     }
+  }
+
+  // pick the right melody table now that isActive is settled
+  if (isActive) {
+    _melodyTable = activeMelodyTable;
+    _melodyCount = activeMelodyCount;
+  } else {
+    _melodyTable = passiveMelodyTable;
+    _melodyCount = passiveMelodyCount;
   }
 
   // shh.
@@ -709,8 +798,8 @@ void BuzzerController::generateCapabilitiesHook(JsonVariant config)
 void BuzzerController::generateMelodyJSON(JsonVariant output)
 {
   output["melodies"][0] = "NONE";
-  for (size_t i = 0; i < melodyCount; i++)
-    output["melodies"][i + 1] = melodyTable[i].name;
+  for (size_t i = 0; i < _melodyCount; i++)
+    output["melodies"][i + 1] = _melodyTable[i].name;
 }
 
 bool BuzzerController::playMelodyByName(const char* melody)
@@ -721,9 +810,9 @@ bool BuzzerController::playMelodyByName(const char* melody)
   const Note* seq = nullptr;
   size_t len = 0;
 
-  for (size_t i = 0; i < melodyCount; i++) {
-    if (!strcmp(melody, melodyTable[i].name)) {
-      playMelody(melodyTable[i].seq, melodyTable[i].len);
+  for (size_t i = 0; i < _melodyCount; i++) {
+    if (!strcmp(melody, _melodyTable[i].name)) {
+      playMelody(_melodyTable[i].seq, _melodyTable[i].len);
       return true;
     }
   }
