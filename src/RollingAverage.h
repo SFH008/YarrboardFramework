@@ -140,6 +140,14 @@ class RollingAverage
     {
       return window_;
     }
+    /**
+     * @brief Set the window in ms
+     */
+    inline void setWindow(uint32_t window_ms)
+    {
+      window_ = window_ms;
+      clear(); // existing samples used wrong window, reset for clean state
+    }
 
     /**
      * @brief Get the sample value at a specific index.
