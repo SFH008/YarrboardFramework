@@ -124,6 +124,8 @@ class ChannelController : public BaseController
       // write it to file
       if (!_app.config.saveConfig(error, sizeof(error)))
         return _app.protocol.generateErrorJSON(output, error);
+
+      ch->onConfigUpdatedHook();
     }
 
     void generateUpdateHook(JsonVariant output) override

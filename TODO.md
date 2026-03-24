@@ -1,9 +1,10 @@
 ## v2.5
 
 * add static ip address support (yarrboard-firmware #11)
-* check out: https://github.com/trip5/ehdp
 
 ## Long Term
+
+* check out: https://github.com/trip5/ehdp
 
 * currently we have a chance of collisions if http api + websockets requests happen simulataneously.
   * best to solve this as a mutex (but is this really needed?)
