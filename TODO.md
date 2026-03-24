@@ -1,5 +1,3 @@
-## v2.5
-
 ## Long Term
 
 * check out: https://github.com/trip5/ehdp
