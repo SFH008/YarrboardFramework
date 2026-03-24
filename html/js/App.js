@@ -799,6 +799,11 @@
         wifi_dns1: function (value) {
           if (!useStatic || value == null || value === "") return {};
           return { format: { pattern: ipPattern, message: "^must be a valid IP address" } };
+        },
+
+        wifi_dns2: function (value) {
+          if (!useStatic || value == null || value === "") return {};
+          return { format: { pattern: ipPattern, message: "^must be a valid IP address" } };
         }
       };
     },
@@ -816,7 +821,8 @@
         wifi_static_ip: $("#wifi_static_ip").val().trim(),
         wifi_gateway: $("#wifi_gateway").val().trim(),
         wifi_subnet: $("#wifi_subnet").val().trim(),
-        wifi_dns1: $("#wifi_dns1").val().trim()
+        wifi_dns1: $("#wifi_dns1").val().trim(),
+        wifi_dns2: $("#wifi_dns2").val().trim()
       };
 
       // validate it
@@ -851,7 +857,8 @@
         wifi_static_ip: settings.wifi_static_ip,
         wifi_gateway: settings.wifi_gateway,
         wifi_subnet: settings.wifi_subnet,
-        wifi_dns1: settings.wifi_dns1
+        wifi_dns1: settings.wifi_dns1,
+        wifi_dns2: settings.wifi_dns2
       });
 
       // reload page after delay
@@ -1452,6 +1459,7 @@
       $("#wifi_gateway").val(msg.wifi_gateway || "");
       $("#wifi_subnet").val(msg.wifi_subnet || "");
       $("#wifi_dns1").val(msg.wifi_dns1 || "");
+      $("#wifi_dns2").val(msg.wifi_dns2 || "");
 
       // wire the toggle (once, idempotent via .off/.on)
       $("#wifi_use_static_ip").off("change.staticip").on("change.staticip", function () {
@@ -1888,7 +1896,13 @@
 
             <div class="form-floating mb-3">
                 <input id="wifi_dns1" type="text" class="form-control" placeholder="8.8.8.8 (optional, defaults to gateway)">
-                <label for="wifi_dns1">DNS Server (optional)</label>
+                <label for="wifi_dns1">Primary DNS (optional)</label>
+                <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="wifi_dns2" type="text" class="form-control" placeholder="8.8.4.4 (optional)">
+                <label for="wifi_dns2">Secondary DNS (optional)</label>
                 <div class="invalid-feedback"></div>
             </div>
         </div>

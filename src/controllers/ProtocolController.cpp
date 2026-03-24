@@ -354,6 +354,10 @@ void ProtocolController::handleSetNetworkConfig(JsonVariantConst input, JsonVari
       if (!testIP.fromString(input["wifi_dns1"] | ""))
         return generateErrorJSON(output, "'wifi_dns1' is not a valid IP address");
     }
+    if (input["wifi_dns2"].is<String>() && strlen(input["wifi_dns2"]) > 0) {
+      if (!testIP.fromString(input["wifi_dns2"] | ""))
+        return generateErrorJSON(output, "'wifi_dns2' is not a valid IP address");
+    }
   }
 
   // get our data
@@ -372,6 +376,7 @@ void ProtocolController::handleSetNetworkConfig(JsonVariantConst input, JsonVari
   strlcpy(_cfg.wifi_gateway, input["wifi_gateway"] | "", sizeof(_cfg.wifi_gateway));
   strlcpy(_cfg.wifi_subnet, input["wifi_subnet"] | "", sizeof(_cfg.wifi_subnet));
   strlcpy(_cfg.wifi_dns1, input["wifi_dns1"] | "", sizeof(_cfg.wifi_dns1));
+  strlcpy(_cfg.wifi_dns2, input["wifi_dns2"] | "", sizeof(_cfg.wifi_dns2));
 
   // make sure we can connect before we save
   if (!strcmp(new_wifi_mode, "client")) {

@@ -227,6 +227,7 @@ void ConfigManager::generateNetworkConfig(JsonVariant output)
   output["wifi_gateway"] = wifi_gateway;
   output["wifi_subnet"] = wifi_subnet;
   output["wifi_dns1"] = wifi_dns1;
+  output["wifi_dns2"] = wifi_dns2;
 }
 
 bool ConfigManager::loadConfigFromFile(const char* file, char* error, size_t len)
@@ -362,6 +363,9 @@ bool ConfigManager::loadNetworkConfigFromJSON(JsonVariant config, char* error, s
 
   v = config["wifi_dns1"] | "";
   strlcpy(wifi_dns1, v, sizeof(wifi_dns1));
+
+  v = config["wifi_dns2"] | "";
+  strlcpy(wifi_dns2, v, sizeof(wifi_dns2));
 
   return true;
 }
