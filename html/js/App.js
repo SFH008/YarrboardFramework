@@ -733,6 +733,9 @@
     },
 
     getNetworkSettingsSchema: function () {
+      const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+      const useStatic = $("#wifi_use_static_ip").is(":checked");
+
       return {
         // either 'ap' or 'client'
         wifi_mode: {
@@ -775,17 +778,45 @@
             pattern: /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/,
             message: "^must be a valid hostname label (e.g., 'brineomatic')"
           }
+        },
+
+        // static IP fields — only required when static IP is enabled
+        wifi_static_ip: useStatic ? {
+          presence: { allowEmpty: false },
+          format: { pattern: ipPattern, message: "^must be a valid IP address" }
+        } : {},
+
+        wifi_gateway: useStatic ? {
+          presence: { allowEmpty: false },
+          format: { pattern: ipPattern, message: "^must be a valid IP address" }
+        } : {},
+
+        wifi_subnet: useStatic ? {
+          presence: { allowEmpty: false },
+          format: { pattern: ipPattern, message: "^must be a valid IP address" }
+        } : {},
+
+        wifi_dns1: function (value) {
+          if (!useStatic || value == null || value === "") return {};
+          return { format: { pattern: ipPattern, message: "^must be a valid IP address" } };
         }
       };
     },
 
     saveNetworkSettings: function () {
+      const useStatic = $("#wifi_use_static_ip").is(":checked");
+
       // pull our form data
       const settings = {
         wifi_mode: $("#wifi_mode").val(),
         wifi_ssid: $("#wifi_ssid").val().trim(),
         wifi_pass: $("#wifi_pass").val().trim(),
-        local_hostname: $("#local_hostname").val().trim()
+        local_hostname: $("#local_hostname").val().trim(),
+        wifi_use_static_ip: useStatic,
+        wifi_static_ip: $("#wifi_static_ip").val().trim(),
+        wifi_gateway: $("#wifi_gateway").val().trim(),
+        wifi_subnet: $("#wifi_subnet").val().trim(),
+        wifi_dns1: $("#wifi_dns1").val().trim()
       };
 
       // validate it
@@ -815,7 +846,12 @@
         wifi_mode: settings.wifi_mode,
         wifi_ssid: settings.wifi_ssid,
         wifi_pass: settings.wifi_pass,
-        local_hostname: settings.local_hostname
+        local_hostname: settings.local_hostname,
+        wifi_use_static_ip: settings.wifi_use_static_ip,
+        wifi_static_ip: settings.wifi_static_ip,
+        wifi_gateway: settings.wifi_gateway,
+        wifi_subnet: settings.wifi_subnet,
+        wifi_dns1: settings.wifi_dns1
       });
 
       // reload page after delay
@@ -1408,6 +1444,19 @@
       $("#wifi_ssid").val(msg.wifi_ssid);
       $("#wifi_pass").val(msg.wifi_pass);
       $("#local_hostname").val(msg.local_hostname);
+
+      const useStatic = msg.wifi_use_static_ip === true;
+      $("#wifi_use_static_ip").prop("checked", useStatic);
+      $("#staticIPFields").toggle(useStatic);
+      $("#wifi_static_ip").val(msg.wifi_static_ip || "");
+      $("#wifi_gateway").val(msg.wifi_gateway || "");
+      $("#wifi_subnet").val(msg.wifi_subnet || "");
+      $("#wifi_dns1").val(msg.wifi_dns1 || "");
+
+      // wire the toggle (once, idempotent via .off/.on)
+      $("#wifi_use_static_ip").off("change.staticip").on("change.staticip", function () {
+        $("#staticIPFields").toggle(this.checked);
+      });
     },
 
     handleAppConfigMessage: function (msg) {
@@ -1809,6 +1858,39 @@
             <label for="local_hostname">Local Hostname</label>
             <span class="input-group-text">.local</span>
             <div class="invalid-feedback"></div>
+        </div>
+
+        <hr>
+
+        <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="wifi_use_static_ip">
+            <label class="form-check-label" for="wifi_use_static_ip">Use Static IP</label>
+        </div>
+
+        <div id="staticIPFields" style="display:none">
+            <div class="form-floating mb-3">
+                <input id="wifi_static_ip" type="text" class="form-control" placeholder="192.168.1.100">
+                <label for="wifi_static_ip">IP Address</label>
+                <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="wifi_gateway" type="text" class="form-control" placeholder="192.168.1.1">
+                <label for="wifi_gateway">Gateway</label>
+                <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="wifi_subnet" type="text" class="form-control" placeholder="255.255.255.0">
+                <label for="wifi_subnet">Subnet Mask</label>
+                <div class="invalid-feedback"></div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="wifi_dns1" type="text" class="form-control" placeholder="8.8.8.8 (optional, defaults to gateway)">
+                <label for="wifi_dns1">DNS Server (optional)</label>
+                <div class="invalid-feedback"></div>
+            </div>
         </div>
 
         <div class="text-center">

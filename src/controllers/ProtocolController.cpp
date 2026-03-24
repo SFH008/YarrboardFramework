@@ -333,6 +333,29 @@ void ProtocolController::handleSetNetworkConfig(JsonVariantConst input, JsonVari
     return generateErrorJSON(output, error);
   }
 
+  // validate static IP fields when static IP is requested
+  bool new_use_static_ip = input["wifi_use_static_ip"] | false;
+  if (new_use_static_ip) {
+    if (!input["wifi_static_ip"].is<String>() || strlen(input["wifi_static_ip"]) == 0)
+      return generateErrorJSON(output, "'wifi_static_ip' is required when wifi_use_static_ip is true");
+    if (!input["wifi_gateway"].is<String>() || strlen(input["wifi_gateway"]) == 0)
+      return generateErrorJSON(output, "'wifi_gateway' is required when wifi_use_static_ip is true");
+    if (!input["wifi_subnet"].is<String>() || strlen(input["wifi_subnet"]) == 0)
+      return generateErrorJSON(output, "'wifi_subnet' is required when wifi_use_static_ip is true");
+
+    IPAddress testIP;
+    if (!testIP.fromString(input["wifi_static_ip"] | ""))
+      return generateErrorJSON(output, "'wifi_static_ip' is not a valid IP address");
+    if (!testIP.fromString(input["wifi_gateway"] | ""))
+      return generateErrorJSON(output, "'wifi_gateway' is not a valid IP address");
+    if (!testIP.fromString(input["wifi_subnet"] | ""))
+      return generateErrorJSON(output, "'wifi_subnet' is not a valid IP address");
+    if (input["wifi_dns1"].is<String>() && strlen(input["wifi_dns1"]) > 0) {
+      if (!testIP.fromString(input["wifi_dns1"] | ""))
+        return generateErrorJSON(output, "'wifi_dns1' is not a valid IP address");
+    }
+  }
+
   // get our data
   char new_wifi_mode[16];
   char new_wifi_ssid[YB_WIFI_SSID_LENGTH];
@@ -342,6 +365,13 @@ void ProtocolController::handleSetNetworkConfig(JsonVariantConst input, JsonVari
   strlcpy(new_wifi_ssid, input["wifi_ssid"] | YB_DEFAULT_AP_SSID, sizeof(new_wifi_ssid));
   strlcpy(new_wifi_pass, input["wifi_pass"] | YB_DEFAULT_AP_PASS, sizeof(new_wifi_pass));
   strlcpy(_cfg.local_hostname, input["local_hostname"] | _app.default_hostname, sizeof(_cfg.local_hostname));
+
+  // static IP fields
+  _cfg.wifi_use_static_ip = new_use_static_ip;
+  strlcpy(_cfg.wifi_static_ip, input["wifi_static_ip"] | "", sizeof(_cfg.wifi_static_ip));
+  strlcpy(_cfg.wifi_gateway, input["wifi_gateway"] | "", sizeof(_cfg.wifi_gateway));
+  strlcpy(_cfg.wifi_subnet, input["wifi_subnet"] | "", sizeof(_cfg.wifi_subnet));
+  strlcpy(_cfg.wifi_dns1, input["wifi_dns1"] | "", sizeof(_cfg.wifi_dns1));
 
   // make sure we can connect before we save
   if (!strcmp(new_wifi_mode, "client")) {

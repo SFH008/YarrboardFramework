@@ -1,7 +1,5 @@
 ## v2.5
 
-* add static ip address support (yarrboard-firmware #11)
-
 ## Long Term
 
 * check out: https://github.com/trip5/ehdp

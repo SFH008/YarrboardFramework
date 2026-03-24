@@ -135,6 +135,20 @@ bool NetworkController::connectToWifi(const char* ssid, const char* pass)
   WiFi.setAutoReconnect(true);
   WiFi.setSleep(false); // optional but usually helps reliability
 
+  // apply static IP config before connecting, if requested
+  if (_cfg.wifi_use_static_ip && strlen(_cfg.wifi_static_ip) > 0) {
+    IPAddress ip, gw, sn, dns;
+    if (ip.fromString(_cfg.wifi_static_ip) &&
+        gw.fromString(_cfg.wifi_gateway) &&
+        sn.fromString(_cfg.wifi_subnet)) {
+      dns.fromString(strlen(_cfg.wifi_dns1) > 0 ? _cfg.wifi_dns1 : _cfg.wifi_gateway);
+      WiFi.config(ip, gw, sn, dns);
+      YBP.printf("[WiFi] Static IP: %s / GW: %s / SN: %s\n", _cfg.wifi_static_ip, _cfg.wifi_gateway, _cfg.wifi_subnet);
+    } else {
+      YBP.println("[WiFi] Static IP config invalid, falling back to DHCP");
+    }
+  }
+
   // How long to try for?
   int tryDuration = 15000;
   int tryDelay = 50;

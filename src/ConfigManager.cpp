@@ -222,6 +222,11 @@ void ConfigManager::generateNetworkConfig(JsonVariant output)
   output["wifi_ssid"] = wifi_ssid;
   output["wifi_pass"] = wifi_pass;
   output["local_hostname"] = local_hostname;
+  output["wifi_use_static_ip"] = wifi_use_static_ip;
+  output["wifi_static_ip"] = wifi_static_ip;
+  output["wifi_gateway"] = wifi_gateway;
+  output["wifi_subnet"] = wifi_subnet;
+  output["wifi_dns1"] = wifi_dns1;
 }
 
 bool ConfigManager::loadConfigFromFile(const char* file, char* error, size_t len)
@@ -342,6 +347,21 @@ bool ConfigManager::loadNetworkConfigFromJSON(JsonVariant config, char* error, s
   // wifi_mode
   v = config["wifi_mode"] | YB_DEFAULT_AP_MODE;
   strlcpy(wifi_mode, v, sizeof(wifi_mode));
+
+  // static IP settings (all optional, default to DHCP)
+  wifi_use_static_ip = config["wifi_use_static_ip"] | false;
+
+  v = config["wifi_static_ip"] | "";
+  strlcpy(wifi_static_ip, v, sizeof(wifi_static_ip));
+
+  v = config["wifi_gateway"] | "";
+  strlcpy(wifi_gateway, v, sizeof(wifi_gateway));
+
+  v = config["wifi_subnet"] | "";
+  strlcpy(wifi_subnet, v, sizeof(wifi_subnet));
+
+  v = config["wifi_dns1"] | "";
+  strlcpy(wifi_dns1, v, sizeof(wifi_dns1));
 
   return true;
 }

@@ -66,6 +66,7 @@
   #define YB_WIFI_PASSWORD_LENGTH 64
   #define YB_WIFI_MODE_LENGTH     16
   #define YB_HOSTNAME_LENGTH      64
+  #define YB_IP_ADDRESS_LENGTH    16
   #define YB_MQTT_SERVER_LENGTH   128
   #define YB_ERROR_LENGTH         128
   #define YB_UUID_LENGTH          17
