@@ -23,9 +23,11 @@ NavicoController::NavicoController(YarrboardApp& app) : BaseController(app, "nav
 // https://github.com/SignalK/signalk-server/blob/master/src/interfaces/mfd_webapp.ts
 void NavicoController::loop()
 {
-  String url = "http://192.168.2.150:80";
-  String protocol;
-  int port;
+  // must be enabled.
+  if (!_cfg.app_enable_mfd)
+    return;
+
+  String url = "http://xxx.xxx.xxx.xxx:yy";
 
   if (millis() - lastNavicoPublishMillis > 10000) {
 
