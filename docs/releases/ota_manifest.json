@@ -1,38 +1,38 @@
 [
     {
         "type": "esp32",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     },
     {
         "type": "esp32-s2",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     },
     {
         "type": "esp32-s3",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     },
     {
         "type": "esp32-c3",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     },
     {
         "type": "esp32-c5",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     },
     {
         "type": "esp32-c6",
-        "version": "2.4.1",
-        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.4.1.bin",
-        "changelog": "# v2.4.1\n\n## Bug Fixes\n\n- Fixed stale cookies when password has changed and double submit of login when pressing Enter\n- Fixed double instantiation of channels\n- Fixed login field corner styling\n- Fixed warning with missing `ConfigManager` include\n- Fixed multiple callbacks being added in discovery callback\n- Fixed alerts being overwritten instead of appended\n\n## Improvements\n\n- Added `MQTTController.getBoardKey()` for getting UUID vs hostname to fix HomeAssistant integration"
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.5.0.bin",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
     }
 ]

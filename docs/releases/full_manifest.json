@@ -48,6 +48,12 @@
     "description": "Works on ESP32 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
+      {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.1.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32/2.4.1-espwebtools/manifest.json",
@@ -72,6 +78,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-S2 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
       {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s2/2.4.1.bin",
@@ -98,6 +110,12 @@
     "description": "Works on ESP32-S3 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
+      {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.1.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-s3/2.4.1-espwebtools/manifest.json",
@@ -122,6 +140,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-C3 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
       {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c3/2.4.1.bin",
@@ -148,6 +172,12 @@
     "description": "Works on ESP32-C5 devkit boards with at least 8MB of flash",
     "firmware": [
       {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
+      {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.1.bin",
         "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c5/2.4.1-espwebtools/manifest.json",
@@ -172,6 +202,12 @@
     "image": "img/rev_a_b_c.jpg",
     "description": "Works on ESP32-C6 devkit boards with at least 8MB of flash",
     "firmware": [
+      {
+        "version": "2.5.0",
+        "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.5.0.bin",
+        "espwebtools_manifest": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.5.0-espwebtools/manifest.json",
+        "changelog": "# v2.5.0\n\n## Features\n\n- Added static IP address support for network configuration\n- Added `onConfigUpdatedHook()` virtual function to `BaseChannel`, called in `ChannelController::handleConfigCommand` to simplify config change handling in channels\n- Added `setWindow()` method to `RollingAverage`\n\n## Improvements\n\n- Separated active and passive buzzer melodies; added morse characters to active buzzer melody list\n\n## Bug Fixes\n\n- `NavicoController` now respects the `app_enable_mfd` configuration option"
+      },
       {
         "version": "2.4.1",
         "url": "https://hoeken.github.io/YarrboardFramework/releases/esp32-c6/2.4.1.bin",
