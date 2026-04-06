@@ -146,7 +146,7 @@
     var navLink = $('<a></a>')
       .addClass('nav-link')
       .attr('href', '#' + this.name)
-      .attr('onclick', 'YB.App.openPage(\'' + this.name + '\')')
+      .on('click', () => YB.App.openPage(this.name))
       .text(this.displayName);
 
     navItem.append(navLink);
@@ -210,6 +210,36 @@
     var contentDiv = this.getContentDiv();
     if (contentDiv)
       contentDiv.show();
+  };
+
+  // Set the page nav badge
+  YB.Page.prototype.setBadge = function (bootstrapClass, data = false) {
+    var navEntry = this.getNavbarEntry();
+    if (!navEntry) return;
+
+    var navLink = navEntry.find('a.nav-link');
+    navLink.find('.badge').remove();
+
+    var badge;
+    if (data) {
+      badge = $('<span></span>')
+        .addClass('badge rounded-pill ms-1 bg-' + bootstrapClass)
+        .text(data);
+    } else {
+      badge = $('<span></span>')
+        .addClass('badge rounded-circle ms-1 bg-' + bootstrapClass + ' border border-1 border-white p-1')
+        .css({ width: '12px', height: '12px' })
+        .html('&nbsp;');
+    }
+
+    navLink.append(badge);
+  };
+
+  // Clear the page nav badge
+  YB.Page.prototype.clearBadge = function () {
+    var navEntry = this.getNavbarEntry();
+    if (!navEntry) return;
+    navEntry.find('a.nav-link .badge').remove();
   };
 
   // Hide the page

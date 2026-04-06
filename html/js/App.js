@@ -155,6 +155,11 @@
         }, 10);
       });
 
+      //home icon click handler
+      $("#home-icon").on('click', function () {
+        YB.App.openPage('home');
+      });
+
       //the login form (handles both button click and enter key)
       $("#loginForm").on('submit', function (e) {
         e.preventDefault();
@@ -288,6 +293,12 @@
     },
 
     showAdminAlert: function (message, type = 'danger') {
+
+      //show a badge
+      let page = YB.App.getPage("system");
+      if (page)
+        page.setBadge("danger");
+
       //we only need one alert at a time.
       $('#adminAlertPlaceholder').append(YB.App.AlertBox(message, type))
 
@@ -968,16 +979,30 @@
 
       //do we have a new version?
       if (YB.Util.compareVersions(data.version, YB.App.config.firmware_version)) {
+
+        //big changelogs are saved as markdown files.
         if (data.changelog) {
-          $("#firmware_changelog").append(marked.parse(data.changelog));
-          $("#firmware_changelog").show();
+          const isUrl = /^https?:\/\//i.test(data.changelog);
+          if (isUrl) {
+            fetch(data.changelog)
+              .then(response => response.text())
+              .then(text => {
+                $("#firmware_changelog_content").html(marked.parse(text));
+                $("#firmware_changelog").show();
+              });
+          } else {
+            $("#firmware_changelog_content").html(marked.parse(data.changelog));
+            $("#firmware_changelog").show();
+          }
         }
 
         $("#new_firmware_version").html(data.version);
-        $("#firmware_bin").attr("href", `${data.url}`);
+        // $("#firmware_bin").attr("href", `${data.url}`);
         $("#firmware_update_available").show();
 
-        YB.App.showAdminAlert(`There is a <a onclick="YB.App.openPage('system')" href="/#system">firmware update</a> available (${data.version}).`, "primary");
+        let page = YB.App.getPage("system");
+        if (page)
+          page.setBadge("primary");
       }
       else
         $("#firmware_up_to_date").show();
@@ -2005,6 +2030,7 @@
     showInNavbar: true,
     ready: true
   });
+  systemPage.onOpen(YB.App.loadConfigs);
   YB.App.addPage(systemPage);
 
   let loginPage = new YB.Page({
