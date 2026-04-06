@@ -12,6 +12,7 @@
     updateInterval: 500,
     updatePollerId: null,
     statsPollerId: null,
+    otaReloadId: null,
 
     username: null,
     password: null,
@@ -1577,12 +1578,6 @@
     },
 
     handleOTAProgressMessage: function (msg) {
-      //YB.log("ota progress");
-
-      //OTA is blocking... so update our heartbeat
-      //TODO: do we need to update this?
-      //last_heartbeat = Date.now();
-
       let progress = Math.round(msg.progress);
 
       let prog_id = `#firmware_progress`;
@@ -1590,17 +1585,24 @@
       if (progress == 100) {
         $(prog_id).removeClass("progress-bar-animated");
         $(prog_id).removeClass("progress-bar-striped");
+        YB.App.afterOTAComplete();
       }
+    },
 
-      //was that the last?
-      if (progress == 100) {
-        YB.App.showAlert("Firmware update successful.", "success");
+    handleOTAFinishedMessage: function () {
+      let prog_id = `#firmware_progress`;
+      $(prog_id).css("width", "100%").text("100%");
+      $(prog_id).removeClass("progress-bar-animated");
+      $(prog_id).removeClass("progress-bar-striped");
+      YB.App.afterOTAComplete();
+    },
 
-        //reload our page
-        setTimeout(function () {
-          location.reload(true);
-        }, 2500);
-      }
+    afterOTAComplete: function () {
+      if (YB.App.otaReloadId) return;
+      YB.App.showAlert("Firmware update successful.", "success");
+      YB.App.otaReloadId = setTimeout(function () {
+        location.reload(true);
+      }, 2500);
     },
 
     handleErrorMessage: function (msg) {
@@ -1981,6 +1983,7 @@
   YB.App.onMessage("network_config", YB.App.handleNetworkConfigMessage);
   YB.App.onMessage("app_config", YB.App.handleAppConfigMessage);
   YB.App.onMessage("ota_progress", YB.App.handleOTAProgressMessage);
+  YB.App.onMessage("ota_finished", YB.App.handleOTAFinishedMessage);
   YB.App.onMessage("error", YB.App.handleErrorMessage);
   YB.App.onMessage("login", YB.App.handleLoginMessage);
   YB.App.onMessage("set_theme", YB.App.handleSetThemeMessage);
