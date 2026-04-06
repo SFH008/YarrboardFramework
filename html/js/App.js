@@ -1598,7 +1598,13 @@
     },
 
     afterOTAComplete: function () {
-      if (YB.App.otaReloadId) return;
+      if (YB.App.otaReloadId)
+        return;
+
+      let page = YB.App.getPage("system");
+      if (page)
+        page.clearBadge();
+
       YB.App.showAlert("Firmware update successful.", "success");
       YB.App.otaReloadId = setTimeout(function () {
         location.reload(true);

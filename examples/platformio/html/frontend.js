@@ -37,12 +37,23 @@ let customPage = new YB.Page({
   showInNavbar: true,
   position: "home",
   ready: true,
-  content: '<h1>Custom Page</h1><p>This is our custom page.</p>'
+  content: `
+    <h1>Custom Page</h1>
+    <p>This is a sample page.</p>
+    <p>When you open it, it clears the navbar badge.</p>
+    <p>When you close it, it re-adds teh navbar badge.</p>
+  `
 });
 
 // Add our open / close handlers and the page itself
-customPage.onOpen(function () { console.log("Custom Page Opened.") });
-customPage.onClose(function () { console.log("Custom Page Closed.") });
+customPage.onOpen(function () {
+  console.log("Custom Page Opened.")
+  YB.App.getPage("custom").clearBadge();
+});
+customPage.onClose(function () {
+  console.log("Custom Page Closed.");
+  YB.App.getPage("custom").setBadge("primary", 1);
+});
 YB.App.addPage(customPage);
 
 // Create a custom page
@@ -67,6 +78,10 @@ YB.App.addSettingsPanel(customPanel);
 
 //click handlers and such need to be added after DOM is ready.
 YB.App.onStart(function () {
+
+  //start with our test badge
+  YB.App.getPage("custom").setBadge("primary", 1);
+
   //click handler for our custom settings panel.
   $("#saveCustomSettings").on("click", function () {
     //pull our form data
