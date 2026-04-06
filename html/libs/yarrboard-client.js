@@ -408,11 +408,11 @@
 							}
 						}
 
-						//status?
-						if (data.status == "error")
-							this.log(`Error: ${data.message}`);
-						if (data.status == "success")
-							this.log(`Success: ${data.message}`);
+						// //status?
+						// if (data.status == "error")
+						// 	this.log(`Error: ${data.message}`);
+						// if (data.status == "success")
+						// 	this.log(`Success: ${data.message}`);
 
 						//are we doing an OTA?
 						if (data.msg == "ota_progress")

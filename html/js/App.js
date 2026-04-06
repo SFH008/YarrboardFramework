@@ -1168,7 +1168,11 @@
           YB.App.openPage("login");
         }
 
-        YB.App.showAlert(msg.message, "danger");
+        //these error messages are a pain to fix easily.
+        if (msg.message.startsWith("Unauthorized for"))
+          YB.log(`⚠️ ${msg.message}`);
+        else
+          YB.App.showAlert(msg.message, "danger");
       }
       else if (msg.status == "success")
         YB.App.showAlert(msg.message, "success");
